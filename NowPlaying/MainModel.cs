@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using Newtonsoft.Json;
-
+using Prism.Mvvm;
 
 namespace NowPlaying
 {
@@ -51,10 +52,13 @@ namespace NowPlaying
         }
         public void ReadSetting()
         {
-            using System.IO.StreamReader r = new System.IO.StreamReader("Setting.json");
-            string json = r.ReadToEnd();
-            Item? items = JsonConvert.DeserializeObject<Item>(json);
-            Spotify.ClientID = items?.ClientID;
+                using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
+                {
+                    string json = r.ReadToEnd();
+                    Item? items = JsonConvert.DeserializeObject<Item>(json);
+                    Spotify.ClientID = items?.ClientID;
+                }
+            
         }
         public class Item
         {
