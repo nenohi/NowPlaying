@@ -43,8 +43,8 @@ namespace NowPlaying
         public bool IsAlwayTop
         {
             get { return _isAlwayTop; }
-            set 
-            { 
+            set
+            {
                 _isAlwayTop = value;
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsAlwayTop"));
             }
@@ -68,12 +68,15 @@ namespace NowPlaying
 
         public void ReadSetting()
         {
-                using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
+            using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
+            {
+                string json = r.ReadToEnd();
+                Item items = JsonConvert.DeserializeObject<Item>(json);
+                if (items != null)
                 {
-                    string json = r.ReadToEnd();
-                    Item? items = JsonConvert.DeserializeObject<Item>(json);
-                    Spotify.ClientID = items?.ClientID;
+                    Spotify.ClientID = items.ClientID;
                 }
+            }
         }
         public class Item
         {
@@ -127,27 +130,32 @@ namespace NowPlaying
                 string artists = "";
                 foreach (var artist in track.Artists)
                 {
-                    artists += "?["+artist.Name+"]("+artist.ExternalUrls.FirstOrDefault().Value+")";
+                    artists += "?[" + artist.Name + "](" + artist.ExternalUrls.FirstOrDefault().Value + ")";
                 }
-                    string txt = "Song:[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")\n" +
-                        "Artist:"+ artists + "\n"+
-                        "Album:?["+ track.Album.Name + "]("+track.Album.ExternalUrls["spotify"]+")\n"+
-                        "#NowPlaying";
-                    await misskey.PostNote(txt, SettingwindowViewModel.MisskeyVisibility);
+                string txt = "Song:[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")\n" +
+                    "Artist:" + artists + "\n" +
+                    "Album:?[" + track.Album.Name + "](" + track.Album.ExternalUrls["spotify"] + ")\n" +
+                    "#NowPlaying";
+                await misskey.PostNote(txt, SettingwindowViewModel.MisskeyVisibility);
             }
-            else if (propertys[0] == "InputMisskeyI")
+            else if (propertys[0] == "MisskeyAuth")
             {
-                misskey.i = SettingwindowViewModel.InputMisskeyI;
+                if (SettingwindowViewModel.InputMisskeyInstanceURL == string.Empty) return;
+                bool res = await misskey.GetToken(SettingwindowViewModel.InputMisskeyInstanceURL);
+                if(misskey.i != string.Empty)
+                {
+                    SettingwindowViewModel.MisskeyConnectButton = "Connected";
+                }
             }
             else if (propertys[0] == "RefreshPlayingView")
             {
                 await RefreshPlayingView();
             }
-            else if(propertys[0] == "SettingIsAlwayTop")
+            else if (propertys[0] == "SettingIsAlwayTop")
             {
                 IsAlwayTop = SettingwindowViewModel.IsAlwayTop;
             }
-            else if(propertys[0] == "PlayerControlCommand")
+            else if (propertys[0] == "PlayerControlCommand")
             {
                 switch (propertys[1])
                 {
@@ -178,10 +186,10 @@ namespace NowPlaying
                     string artists = "";
                     foreach (var item in track.Artists)
                     {
-                        artists += item.Name+"・";
+                        artists += item.Name + "・";
                     }
-                    artists = Regex.Replace(artists,"・$",string.Empty);
-                    if(MainwindowViewModel.ViewSong != track.Name)
+                    artists = Regex.Replace(artists, "・$", string.Empty);
+                    if (MainwindowViewModel.ViewSong != track.Name)
                     {
                         MainwindowViewModel.ViewSong = track.Name;
                         MainwindowViewModel.ViewAlbum = track.Album.Name;

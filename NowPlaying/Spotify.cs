@@ -10,7 +10,6 @@ namespace NowPlaying
 {
     internal class Spotify
     {
-        private static EmbedIOAuthServer _server;
         private static EmbedIOAuthServer _server2;
         private static EmbedIOAuthServer _server3;
         private static SpotifyClient spotifyClient;
