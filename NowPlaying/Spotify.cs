@@ -18,11 +18,20 @@ namespace NowPlaying
         public static bool IsGetToken = false;
         private string refreshtoken;
         private string _clientID;
+        public System.Timers.Timer refreshtimer = new System.Timers.Timer();
+        
         public string ClientID
         {
             get { return _clientID; }
             set { _clientID = value; }
         }
+        public Spotify()
+        {
+            refreshtimer.Interval = 5000;
+            refreshtimer.AutoReset = true;
+            refreshtimer.Enabled = true;
+        }
+
         public async Task GetToken2()
         {
             _server2 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);

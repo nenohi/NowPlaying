@@ -57,7 +57,14 @@ namespace NowPlaying
             ReadSetting();
             MainwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
             SettingwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
+            Spotify.refreshtimer.Elapsed += Refreshtimer_Elapsed;
         }
+
+        private void Refreshtimer_Elapsed(object? sender, ElapsedEventArgs e)
+        {
+            RefreshPlayingView();
+        }
+
         public void ReadSetting()
         {
                 using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
@@ -115,25 +122,17 @@ namespace NowPlaying
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
                 if (misskey.i == "") return;
-                if (playing != null)
-                {
-                    if(playing.Item.Type == SpotifyAPI.Web.ItemType.Track)
-                    {
-                        SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
-                        MainwindowViewModel.ViewSong = track.Name;
-                        MainwindowViewModel.ViewAlbum = track.Album.Name;
-                        MainwindowViewModel.ViewArtist = track.Artists[0].Name;
-                        MainwindowViewModel.ViewImageURL(track.Album.Images[0].Url);
-                        string txt = "Song:[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")\n" +
-                            "Artist:"+ track.Artists[0].Name + "\n"+
-                            "Album:"+ track.Album.Name + "\n"+
-                            "#NowPlaying";
-                        if(misskey.i != "")
-                        {
-                            misskey.PostNote(txt, SettingwindowViewModel.MisskeyVisibility);
-                        }
-                    }
-                }
+                if (playing == null) return;
+                SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
+                MainwindowViewModel.ViewSong = track.Name;
+                MainwindowViewModel.ViewAlbum = track.Album.Name;
+                MainwindowViewModel.ViewArtist = track.Artists[0].Name;
+                MainwindowViewModel.ViewImageURL(track.Album.Images[0].Url);
+                    string txt = "Song:[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")\n" +
+                        "Artist:?["+ track.Artists[0].Name + "]("+track.Artists[0].ExternalUrls["spotify"]+")\n"+
+                        "Album:?["+ track.Album.Name + "]("+track.Album.ExternalUrls["spotify"]+")\n"+
+                        "#NowPlaying";
+                    await misskey.PostNote(txt, SettingwindowViewModel.MisskeyVisibility);
             }
             else if (propertys[0] == "InputMisskeyI")
             {
@@ -176,10 +175,15 @@ namespace NowPlaying
                 if (playing.Item.Type == SpotifyAPI.Web.ItemType.Track)
                 {
                     SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
-                    MainwindowViewModel.ViewSong = track.Name;
-                    MainwindowViewModel.ViewAlbum = track.Album.Name;
-                    MainwindowViewModel.ViewArtist = track.Artists[0].Name;
-                    MainwindowViewModel.ViewImageURL(track.Album.Images[0].Url);
+                    if(MainwindowViewModel.ViewSong != track.Name && 
+                        MainwindowViewModel.ViewAlbum != track.Album.Name && 
+                        MainwindowViewModel.ViewArtist != track.Artists[0].Name)
+                    {
+                        MainwindowViewModel.ViewSong = track.Name;
+                        MainwindowViewModel.ViewAlbum = track.Album.Name;
+                        MainwindowViewModel.ViewArtist = track.Artists[0].Name;
+                        await MainwindowViewModel.ViewImageURL(track.Album.Images[0].Url);
+                    }
 
                 }
             }

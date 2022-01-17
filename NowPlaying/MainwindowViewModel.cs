@@ -15,17 +15,22 @@ namespace NowPlaying
         private string _viewSong ="";
         private string _viewArtist="";
         private string _viewAlbum="";
-
-        private void TimerFunc(object? state)
+        public async Task ViewImageURL(string url)
         {
-            OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("RefreshPlayingView"));
-        }
-
-
-        public void ViewImageURL(string url)
-        {
-            if (url == null) return;
-            ViewImage = new BitmapImage(new Uri(url));
+            using (var web = new System.Net.Http.HttpClient())
+            {
+                var bytes = await web.GetByteArrayAsync(url).ConfigureAwait(false);
+                using (var stream = new System.IO.MemoryStream(bytes))
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = stream;
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+                    ViewImage = bitmap;
+                }
+            }
         }
         public BitmapImage ViewImage
         {
