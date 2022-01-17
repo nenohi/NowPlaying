@@ -57,8 +57,6 @@ namespace NowPlaying
             ReadSetting();
             MainwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
             SettingwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
-            MainwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
-            SettingwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
         }
         public void ReadSetting()
         {
@@ -116,12 +114,12 @@ namespace NowPlaying
                     await Spotify.RefreshToken();
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
+                if (misskey.i == "") return;
                 if (playing != null)
                 {
                     if(playing.Item.Type == SpotifyAPI.Web.ItemType.Track)
                     {
                         SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
-                        if (track.Name == MainwindowViewModel.ViewSong) return;
                         MainwindowViewModel.ViewSong = track.Name;
                         MainwindowViewModel.ViewAlbum = track.Album.Name;
                         MainwindowViewModel.ViewArtist = track.Artists[0].Name;
@@ -143,28 +141,32 @@ namespace NowPlaying
             }
             else if (propertys[0] == "RefreshPlayingView")
             {
-                if (!Spotify.IsGetToken) return;
-
-                SpotifyAPI.Web.CurrentlyPlaying playing = await Spotify.GetCurrentlyPlaying();
-                if (playing != null)
-                {
-                    if (playing.Item.Type == SpotifyAPI.Web.ItemType.Track)
-                    {
-                        SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
-                        MainwindowViewModel.ViewSong = track.Name;
-                        MainwindowViewModel.ViewAlbum = track.Album.Name;
-                        MainwindowViewModel.ViewArtist = track.Artists[0].Name;
-                        MainwindowViewModel.ViewImageURL(track.Album.Images[0].Url);
-
-                    }
-                }
+                await RefreshPlayingView();
             }
             else if(propertys[0] == "SettingIsAlwayTop")
             {
                 IsAlwayTop = SettingwindowViewModel.IsAlwayTop;
             }
+            else if(propertys[0] == "PlayerControlCommand")
+            {
+                switch (propertys[1])
+                {
+                    case "Previous":
+                        await Spotify.PreviousSongs();
+                        break;
+                    case "PlayResume":
+                        await Spotify.PlayResume();
+                        break;
+                    case "Next":
+                        await Spotify.NextSongs();
+                        break;
+                    default:
+                        break;
+                }
+                await RefreshPlayingView();
+            }
         }
-        public async void RefreshPlayingView()
+        public async Task RefreshPlayingView()
         {
             if (!Spotify.IsGetToken) return;
 

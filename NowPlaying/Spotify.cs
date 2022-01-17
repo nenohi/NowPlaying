@@ -65,18 +65,25 @@ namespace NowPlaying
             );
 
             spotifyClient = new SpotifyClient(initialResponse.AccessToken);
+            Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+
             // Also important for later: response.RefreshToken
             IsGetToken = true;
             refreshtoken = initialResponse.RefreshToken;
+            await _server3.Stop();
         }
         public async Task RefreshToken()
         {
+            _server3 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+            await _server3.Start();
             var newResponse = await new OAuthClient().RequestToken(
               new PKCETokenRefreshRequest(ClientID, refreshtoken)
             );
 
             spotifyClient = new SpotifyClient(newResponse.AccessToken);
             refreshtoken = newResponse.RefreshToken;
+            await _server3.Stop();
+
         }
         public async Task<CurrentlyPlaying> GetCurrentlyPlaying()
         {
@@ -84,9 +91,29 @@ namespace NowPlaying
             Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             return Playing;
         }
-        public async Task RefreshgetnewToken()
-        {
 
+        public async Task NextSongs()
+        {
+            if(spotifyClient == null) return;
+            await spotifyClient.Player.SkipNext();
+        }
+        public async Task PreviousSongs()
+        {
+            if(spotifyClient == null) return;
+            await spotifyClient.Player.SkipPrevious();
+        }
+        public async Task PlayResume()
+        {
+            if (spotifyClient == null) return;
+            //Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            if (Playing.IsPlaying)
+            {
+                await spotifyClient.Player.PausePlayback();
+            }
+            else
+            {
+                await spotifyClient.Player.ResumePlayback();
+            }
         }
     }
 }

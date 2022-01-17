@@ -83,5 +83,16 @@ namespace NowPlaying
                 });
             }
         }
+
+        public DelegateCommand<string> PlayerControlCommand
+        {
+            get
+            {
+                return new DelegateCommand<string>((par) =>
+                {
+                    OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("PlayerControlCommand-" + par));
+                });
+            }
+        }
     }
 }

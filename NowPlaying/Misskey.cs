@@ -12,7 +12,10 @@ namespace NowPlaying
 {
     internal class Misskey
     {
-        public string i { get; set; } = "";
+        public string i { get; set; } = string.Empty;
+        public string song { get; set; } = string.Empty;
+        public string artist { get; set; } = string.Empty;
+        public string album { get; set; } = string.Empty;
         public async Task PostNote(string Text, string Visibility)
         {
             Dictionary<string, string> postdata = new Dictionary<string, string>();
