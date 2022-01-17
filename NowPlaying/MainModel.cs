@@ -140,6 +140,7 @@ namespace NowPlaying
             }
             else if (propertys[0] == "MisskeyAuth")
             {
+                if (SettingwindowViewModel.InputMisskeyInstanceURL == string.Empty) return;
                 bool res = await misskey.GetToken(SettingwindowViewModel.InputMisskeyInstanceURL);
                 if(misskey.i != string.Empty)
                 {
