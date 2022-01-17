@@ -15,7 +15,7 @@ namespace NowPlaying
         private MainwindowViewModel _mainwindowViewModel = new MainwindowViewModel();
         private SettingwindowViewModel _settingwindowViewModel = new SettingwindowViewModel();
         private SettingWindow _settingWindow = new SettingWindow();
-        private Spotify _spotify = new Spotify();
+        private Spotify _spotify;
         private Misskey misskey = new Misskey();
         private bool _isAlwayTop = false;
         public MainwindowViewModel MainwindowViewModel
@@ -60,9 +60,9 @@ namespace NowPlaying
             Spotify.refreshtimer.Elapsed += Refreshtimer_Elapsed;
         }
 
-        private void Refreshtimer_Elapsed(object? sender, ElapsedEventArgs e)
+        private async void Refreshtimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
-            RefreshPlayingView();
+            await RefreshPlayingView();
         }
 
         public void ReadSetting()
