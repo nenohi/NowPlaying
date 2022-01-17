@@ -21,17 +21,27 @@ namespace NowPlaying
             {2, "followers"},
             {3, "specified"},
         };
+        private string _MisskeyConnectButton = "Connect";
+        public string MisskeyConnectButton
+        {
+            get { return _MisskeyConnectButton; }
+            set
+            {
+                _MisskeyConnectButton = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MisskeyConnectButton"));
+            }
+        }
         public Dictionary<int,string> MisskeyVisibilitys
         {
             get { return _misskeyVisibilitys; }
         }
-        public string InputMisskeyI
+        public string InputMisskeyInstanceURL
         {
             get { return _inputMisskeyInstanceURL; }
             set
             {
                 _inputMisskeyInstanceURL = value;
-                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(InputMisskeyI)));
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("InputMisskeyInstanceURL"));
             }
         }
         public string MisskeyVisibility
@@ -74,6 +84,16 @@ namespace NowPlaying
                 });
             }
         }
+        public DelegateCommand MisskeyAuth
+        {
+            get
+            {
+                return new DelegateCommand(() =>
+                {
+                    OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MisskeyAuth"));
+                });
+            }
+        }
 
         public bool IsAlwayTop
         {
@@ -83,6 +103,10 @@ namespace NowPlaying
                 _IsAlwayTop = value;
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingIsAlwayTop"));
             }
+        }
+        public void showMesseage()
+        {
+            
         }
     }
 }
