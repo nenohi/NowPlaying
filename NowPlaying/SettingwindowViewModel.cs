@@ -13,6 +13,7 @@ namespace NowPlaying
         private bool _spotifybuttondisable = true;
         private string _inputSpotifyToken = "";
         private string _misskeyVisibility = "";
+        private bool _IsAlwayTop=false;
         private Dictionary<int,string> _misskeyVisibilitys = new Dictionary<int, string>()
         {
             {0,"public"},
@@ -71,6 +72,16 @@ namespace NowPlaying
                 {
                     OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SpotifyConnect"));
                 });
+            }
+        }
+
+        public bool IsAlwayTop
+        {
+            get { return _IsAlwayTop; }
+            set
+            {
+                _IsAlwayTop = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingIsAlwayTop"));
             }
         }
     }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NowPlaying"
         mc:Ignorable="d"
-        Title="NowPlayingSpotify" Height="233" Width="433" ResizeMode="NoResize">
+        Title="NowPlayingSpotify" Height="233" Width="433" ResizeMode="NoResize" Topmost="{Binding IsAlwayTop}">
     <Grid>
         <local:Main/>
     </Grid>

@@ -23,21 +23,6 @@ namespace NowPlaying
             get { return _clientID; }
             set { _clientID = value; }
         }
-        public async Task GetToken()
-        {
-            // Make sure "http://localhost:5000/callback" is in your spotify application as redirect uri!
-            _server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
-            await _server.Start();
-
-            _server.ImplictGrantReceived += OnImplicitGrantReceived;
-            _server.ErrorReceived += Server_ErrorReceived; ;
-
-            var request = new LoginRequest(_server.BaseUri, ClientID, LoginRequest.ResponseType.Token)
-            {
-                Scope = new List<string> {Scopes.UserModifyPlaybackState, Scopes.UserReadRecentlyPlayed, Scopes.UserReadCurrentlyPlaying }
-            };
-            BrowserUtil.Open(request.ToUri());
-        }
         public async Task GetToken2()
         {
             _server2 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
@@ -92,20 +77,6 @@ namespace NowPlaying
 
             spotifyClient = new SpotifyClient(newResponse.AccessToken);
             refreshtoken = newResponse.RefreshToken;
-        }
-        private static async Task Server_ErrorReceived(object sender, string error, string? state)
-        {
-            Console.WriteLine($"Aborting authorization, error received: {error}");
-            await _server.Stop();
-        }
-
-        private static async Task OnImplicitGrantReceived(object sender, ImplictGrantResponse response)
-        {
-            await _server.Stop();
-            spotifyClient = new SpotifyClient(response.AccessToken, response.TokenType);
-            // do calls with Spotify
-            Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
-            IsGetToken = true;
         }
         public async Task<CurrentlyPlaying> GetCurrentlyPlaying()
         {

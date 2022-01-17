@@ -8,7 +8,7 @@
         Title="SettingWindow" Height="218" Width="428" ResizeMode="NoResize">
     <Grid>
         <TabControl>
-            <TabItem Header="TabItem">
+            <TabItem Header="アカウント連携">
                 <Grid Background="#FFE5E5E5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -38,8 +38,22 @@
 
                 </Grid>
             </TabItem>
-            <TabItem Header="TabItem">
-                <Grid Background="#FFE5E5E5"/>
+            <TabItem Header="UI">
+                <Grid Background="#FFE5E5E5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <CheckBox Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.ColumnSpan="2" Content="常に最前面に表示する" IsChecked="{Binding IsAlwayTop}"/>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

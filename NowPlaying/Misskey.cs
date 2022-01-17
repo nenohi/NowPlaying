@@ -13,11 +13,11 @@ namespace NowPlaying
     internal class Misskey
     {
         public string i { get; set; } = "";
-        public async Task PostNote(string Text, string? Visibility)
+        public async Task PostNote(string Text, string Visibility)
         {
             Dictionary<string, string> postdata = new Dictionary<string, string>();
             postdata.Add("text", Text);
-            postdata.Add("visibility", Visibility ?? "public");
+            postdata.Add("visibility", Visibility==""?"public":Visibility);
             postdata.Add("i", i);
             var postjson = JsonConvert.SerializeObject(postdata);
             using(HttpClient client = new HttpClient())

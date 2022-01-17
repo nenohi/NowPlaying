@@ -17,6 +17,7 @@ namespace NowPlaying
         private SettingWindow _settingWindow = new SettingWindow();
         private Spotify _spotify = new Spotify();
         private Misskey misskey = new Misskey();
+        private bool _isAlwayTop = false;
         public MainwindowViewModel MainwindowViewModel
         {
             get { return _mainwindowViewModel; }
@@ -38,6 +39,15 @@ namespace NowPlaying
             set { _spotify = value; }
         }
 
+        public bool IsAlwayTop
+        {
+            get { return _isAlwayTop; }
+            set 
+            { 
+                _isAlwayTop = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsAlwayTop"));
+            }
+        }
 
         public MainModel()
         {
@@ -85,6 +95,7 @@ namespace NowPlaying
             }
             else if (propertys[0] == "SpotifyConnect")
             {
+                if (!SettingwindowViewModel.Spotifybuttondisable) return;
                 SettingwindowViewModel.Spotifybuttondisable = false;
                 await Spotify.GetToken2();
             }
@@ -147,6 +158,10 @@ namespace NowPlaying
 
                     }
                 }
+            }
+            else if(propertys[0] == "SettingIsAlwayTop")
+            {
+                IsAlwayTop = SettingwindowViewModel.IsAlwayTop;
             }
         }
         public async void RefreshPlayingView()
