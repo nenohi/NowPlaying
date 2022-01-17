@@ -1,0 +1,121 @@
+﻿using SpotifyAPI.Web;
+using SpotifyAPI.Web.Auth;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace NowPlaying
+{
+    internal class Spotify
+    {
+        private static EmbedIOAuthServer _server;
+        private static EmbedIOAuthServer _server2;
+        private static EmbedIOAuthServer _server3;
+        private static SpotifyClient spotifyClient;
+        private static CurrentlyPlaying Playing;
+        public static bool IsGetToken = false;
+        private string refreshtoken;
+        private string _clientID;
+        public string ClientID
+        {
+            get { return _clientID; }
+            set { _clientID = value; }
+        }
+        public async Task GetToken()
+        {
+            // Make sure "http://localhost:5000/callback" is in your spotify application as redirect uri!
+            _server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+            await _server.Start();
+
+            _server.ImplictGrantReceived += OnImplicitGrantReceived;
+            _server.ErrorReceived += Server_ErrorReceived; ;
+
+            var request = new LoginRequest(_server.BaseUri, ClientID, LoginRequest.ResponseType.Token)
+            {
+                Scope = new List<string> {Scopes.UserModifyPlaybackState, Scopes.UserReadRecentlyPlayed, Scopes.UserReadCurrentlyPlaying }
+            };
+            BrowserUtil.Open(request.ToUri());
+        }
+        public async Task GetToken2()
+        {
+            _server2 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+            await _server2.Start();
+            _server2.AuthorizationCodeReceived += _server2_AuthorizationCodeReceived;
+
+            (string verifier,string challenge) = PKCEUtil.GenerateCodes("o5nUHWpSJ3gMP5V3wWMqWwAWo6ikAN5QKi2gkutL5vZyKKkezw6gFGH5KYfc9M5j33mFCCZytMcf4dVh");
+            // Returns the passed string and its challenge (Make sure it's random and long enough)
+            var loginRequest = new LoginRequest(
+              new Uri("http://localhost:5000/callback"),
+              ClientID,
+              LoginRequest.ResponseType.Code
+            )
+            {
+                CodeChallengeMethod = "S256",
+                CodeChallenge = challenge,
+                Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.UserModifyPlaybackState, Scopes.UserReadRecentlyPlayed, Scopes.UserReadCurrentlyPlaying }
+            };
+            var uri = loginRequest.ToUri();
+            BrowserUtil.Open(uri);
+        }
+
+        private async Task _server2_AuthorizationCodeReceived(object arg1, AuthorizationCodeResponse arg2)
+        {
+            await _server2.Stop();
+            await GetCallback(arg2.Code);
+        }
+
+        // This method should be called from your web-server when the user visits "http://localhost:5000/callback"
+        public async Task GetCallback(string code)
+        {
+            _server3 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+            await _server3.Start();
+
+            (string verifier, string challenge) = PKCEUtil.GenerateCodes("o5nUHWpSJ3gMP5V3wWMqWwAWo6ikAN5QKi2gkutL5vZyKKkezw6gFGH5KYfc9M5j33mFCCZytMcf4dVh");
+            // Note that we use the verifier calculated above!
+            
+            var initialResponse = await new OAuthClient().RequestToken(
+              new PKCETokenRequest(ClientID, code, new Uri("http://localhost:5000/callback"), verifier)
+            );
+
+            spotifyClient = new SpotifyClient(initialResponse.AccessToken);
+            // Also important for later: response.RefreshToken
+            IsGetToken = true;
+            refreshtoken = initialResponse.RefreshToken;
+        }
+        public async Task RefreshToken()
+        {
+            var newResponse = await new OAuthClient().RequestToken(
+              new PKCETokenRefreshRequest(ClientID, refreshtoken)
+            );
+
+            spotifyClient = new SpotifyClient(newResponse.AccessToken);
+            refreshtoken = newResponse.RefreshToken;
+        }
+        private static async Task Server_ErrorReceived(object sender, string error, string? state)
+        {
+            Console.WriteLine($"Aborting authorization, error received: {error}");
+            await _server.Stop();
+        }
+
+        private static async Task OnImplicitGrantReceived(object sender, ImplictGrantResponse response)
+        {
+            await _server.Stop();
+            spotifyClient = new SpotifyClient(response.AccessToken, response.TokenType);
+            // do calls with Spotify
+            Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            IsGetToken = true;
+        }
+        public async Task<CurrentlyPlaying> GetCurrentlyPlaying()
+        {
+            if (spotifyClient == null) return Playing;
+            Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            return Playing;
+        }
+        public async Task RefreshgetnewToken()
+        {
+
+        }
+    }
+}
