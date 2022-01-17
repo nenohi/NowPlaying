@@ -21,25 +21,31 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="0.5*"/>
+                <RowDefinition Height="0.2*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="0.5*"/>
+                <RowDefinition Height="0.6*"/>
+                <RowDefinition Height="0.2*"/>
             </Grid.RowDefinitions>
             <Label Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="1" Content="Song"/>
-            <Label Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" Content="{Binding ViewSong}"/>
+            <Label Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" VerticalContentAlignment="Top">
+                <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding ViewSong}"/>
+            </Label>
 
             <Label Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Content="Artist"/>
-            <Label Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" Content="{Binding ViewArtist}"/>
+            <Label Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" VerticalContentAlignment="Top">
+                <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding ViewArtist}"/>
+            </Label>
 
             <Label Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="1" Content="Album"/>
-            <Label Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" Content="{Binding ViewAlbum}"/>
+            <Label Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" VerticalContentAlignment="Top">
+                <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding ViewAlbum}"/>
+            </Label>
 
-            <Button Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="1" Content="Playing" Command="{Binding PlayingSend}"/>
-            <Button Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="1" Content="Setting" Command="{Binding OpenSettingWindow}"/>
+            <Button Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="1" Content="Playing" Command="{Binding PlayingSend}" Margin="5,0"/>
+            <Button Grid.Column="2" Grid.Row="5" Grid.ColumnSpan="1" Content="Setting" Command="{Binding OpenSettingWindow}" Margin="5,0"/>
         </Grid>
 
     </Grid>
