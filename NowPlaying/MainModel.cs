@@ -57,10 +57,10 @@ namespace NowPlaying
             MainwindowViewModel = new MainwindowViewModel();
             SettingwindowViewModel = new SettingwindowViewModel();
             Spotify = new Spotify();
-            ReadSetting();
             MainwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
             SettingwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
             Spotify.refreshtimer.Elapsed += Refreshtimer_Elapsed;
+            ReadSetting();
         }
 
         private async void Refreshtimer_Elapsed(object? sender, ElapsedEventArgs e)
