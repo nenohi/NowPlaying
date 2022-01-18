@@ -125,7 +125,7 @@ namespace NowPlaying
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
                 if (misskey.i == "") return;
-                if (playing == null) return;
+                if (playing == null || playing.Item == null) return;
                 SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
                 string artists = "";
                 foreach (var artist in track.Artists)
@@ -178,7 +178,7 @@ namespace NowPlaying
             if (!Spotify.IsGetToken) return;
 
             SpotifyAPI.Web.CurrentlyPlaying playing = await Spotify.GetCurrentlyPlaying();
-            if (playing != null)
+            if (playing != null && playing.Item != null)
             {
                 if (playing.Item.Type == SpotifyAPI.Web.ItemType.Track)
                 {

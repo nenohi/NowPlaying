@@ -1,4 +1,4 @@
-﻿using SpotifyAPI.Web;
+using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 using System;
 using System.Collections.Generic;
@@ -96,7 +96,15 @@ namespace NowPlaying
         public async Task<CurrentlyPlaying> GetCurrentlyPlaying()
         {
             if (spotifyClient == null) return Playing;
-            Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            try
+            {
+                Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            }
+            catch (APIUnauthorizedException e)
+            {
+                await RefreshToken();
+                Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            }
             return Playing;
         }
 
@@ -112,7 +120,7 @@ namespace NowPlaying
         }
         public async Task PlayResume()
         {
-            if (spotifyClient == null) return;
+            if (spotifyClient == null && Playing == null) return;
             //Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             if (Playing.IsPlaying)
             {
