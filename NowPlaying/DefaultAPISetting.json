@@ -1,4 +1,9 @@
 {
   "$comment": "this file copy paste and rename 'APISetting.json' ",
   "ClientID": "Your-Spotify-App-ClientID",
+  "MisskeyToken": "",
+  "MisskeyInstanceURL": "",
+  "SpotifyRefToken": "",
+  "alwaytop": false,
+  "MisskeyVisibility": "public"
 }

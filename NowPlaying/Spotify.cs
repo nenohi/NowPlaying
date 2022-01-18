@@ -18,26 +18,58 @@ namespace NowPlaying
         private string refreshtoken;
         private string _clientID;
         public System.Timers.Timer refreshtimer = new System.Timers.Timer();
-        
+
         public string ClientID
         {
             get { return _clientID; }
             set { _clientID = value; }
+        }
+        public string RefreshToken
+        {
+            get { return refreshtoken; }
         }
         public Spotify()
         {
             refreshtimer.Interval = 5000;
             refreshtimer.AutoReset = true;
             refreshtimer.Enabled = true;
+            refreshtimer.Elapsed += Refreshtimer_Elapsed;
         }
 
+        private void Refreshtimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+
+        }
+        public async Task<bool> SetToken(string reftoken)
+        {
+            try
+            {
+                _server3 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
+                await _server3.Start();
+                var newResponse = await new OAuthClient().RequestToken(
+                  new PKCETokenRefreshRequest(ClientID, reftoken)
+                );
+
+                spotifyClient = new SpotifyClient(newResponse.AccessToken);
+                Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+                refreshtoken = newResponse.RefreshToken;
+                IsGetToken = true;
+                await _server3.Stop();
+            }
+            catch
+            {
+                await _server3.Stop();
+                return false;
+            }
+            return true;
+        }
         public async Task GetToken2()
         {
             _server2 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
             await _server2.Start();
             _server2.AuthorizationCodeReceived += _server2_AuthorizationCodeReceived;
 
-            (string verifier,string challenge) = PKCEUtil.GenerateCodes("o5nUHWpSJ3gMP5V3wWMqWwAWo6ikAN5QKi2gkutL5vZyKKkezw6gFGH5KYfc9M5j33mFCCZytMcf4dVh");
+            (string verifier, string challenge) = PKCEUtil.GenerateCodes("o5nUHWpSJ3gMP5V3wWMqWwAWo6ikAN5QKi2gkutL5vZyKKkezw6gFGH5KYfc9M5j33mFCCZytMcf4dVh");
             // Returns the passed string and its challenge (Make sure it's random and long enough)
             var loginRequest = new LoginRequest(
               new Uri("http://localhost:5000/callback"),
@@ -67,7 +99,7 @@ namespace NowPlaying
 
             (string verifier, string challenge) = PKCEUtil.GenerateCodes("o5nUHWpSJ3gMP5V3wWMqWwAWo6ikAN5QKi2gkutL5vZyKKkezw6gFGH5KYfc9M5j33mFCCZytMcf4dVh");
             // Note that we use the verifier calculated above!
-            
+
             var initialResponse = await new OAuthClient().RequestToken(
               new PKCETokenRequest(ClientID, code, new Uri("http://localhost:5000/callback"), verifier)
             );
@@ -80,7 +112,7 @@ namespace NowPlaying
             refreshtoken = initialResponse.RefreshToken;
             await _server3.Stop();
         }
-        public async Task RefreshToken()
+        public async Task RefreshTokenFunc()
         {
             _server3 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
             await _server3.Start();
@@ -102,7 +134,7 @@ namespace NowPlaying
             }
             catch (APIUnauthorizedException e)
             {
-                await RefreshToken();
+                await RefreshTokenFunc();
                 Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             }
             return Playing;
@@ -110,12 +142,12 @@ namespace NowPlaying
 
         public async Task NextSongs()
         {
-            if(spotifyClient == null) return;
+            if (spotifyClient == null) return;
             await spotifyClient.Player.SkipNext();
         }
         public async Task PreviousSongs()
         {
-            if(spotifyClient == null) return;
+            if (spotifyClient == null) return;
             await spotifyClient.Player.SkipPrevious();
         }
         public async Task PlayResume()
@@ -130,6 +162,12 @@ namespace NowPlaying
             {
                 await spotifyClient.Player.ResumePlayback();
             }
+        }
+        public void Dispose()
+        {
+            refreshtimer.Stop();
+            refreshtimer.Dispose();
+
         }
     }
 }

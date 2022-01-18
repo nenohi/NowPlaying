@@ -13,9 +13,6 @@ namespace NowPlaying
     internal class Misskey
     {
         public string i { get; set; } = string.Empty;
-        public string song { get; set; } = string.Empty;
-        public string artist { get; set; } = string.Empty;
-        public string album { get; set; } = string.Empty;
         public string instanceurl { get; set; } = "https://misskey.io";
         private string appSecret { get; set; } = string.Empty;
         private string token { get; set; } = string.Empty;
@@ -32,22 +29,27 @@ namespace NowPlaying
                 var content = new StringContent(postjson, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(instanceurl + "/api/notes/create", content);
             }
-
         }
         public async Task<bool> GetToken(string url)
         {
+            var httpsmatch = System.Text.RegularExpressions.Regex.Match(url, "https://");
+            string tmpurl=string.Empty;
+            if (httpsmatch.Success)
+            {
+                tmpurl = url;
+            }
+            else
+            {
+                tmpurl = "https://" + url;
+            }
+            if(tmpurl != instanceurl)
+            {
+                appSecret = string.Empty;
+                token = string.Empty;
+            }
             if (appSecret == string.Empty && token == string.Empty)
             {
 
-                var httpsmatch = System.Text.RegularExpressions.Regex.Match(url, "https://");
-                if (httpsmatch.Success)
-                {
-                    instanceurl = url;
-                }
-                else
-                {
-                    instanceurl = "https://" + url;
-                }
                 string appcreateresponse = await CreateApp(url);
                 if (appcreateresponse == null) return false;
                 AppCreateRes appres;

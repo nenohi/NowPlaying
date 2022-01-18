@@ -11,7 +11,8 @@ namespace NowPlaying
     {
         private string _inputMisskeyInstanceURL = "";
         private bool _spotifybuttondisable = true;
-        private string _inputSpotifyToken = "";
+        private bool _misskeyButtonDisable = true;
+        private string _spotifyConnectButton = "Connect";
         private string _misskeyVisibility = "";
         private bool _IsAlwayTop=false;
         private Dictionary<int,string> _misskeyVisibilitys = new Dictionary<int, string>()
@@ -31,6 +32,15 @@ namespace NowPlaying
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MisskeyConnectButton"));
             }
         }
+        public bool MisskeyButtonDisable
+        {
+            get { return _misskeyButtonDisable; }
+            set
+            {
+                _misskeyButtonDisable =value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MisskeyButtonDisable"));
+            }
+        }
         public Dictionary<int,string> MisskeyVisibilitys
         {
             get { return _misskeyVisibilitys; }
@@ -40,8 +50,12 @@ namespace NowPlaying
             get { return _inputMisskeyInstanceURL; }
             set
             {
-                _inputMisskeyInstanceURL = value;
-                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("InputMisskeyInstanceURL"));
+                if(_inputMisskeyInstanceURL != value)
+                {
+                    MisskeyButtonDisable = true;
+                    _inputMisskeyInstanceURL = value;
+                    OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("InputMisskeyInstanceURL"));
+                }
             }
         }
         public string MisskeyVisibility
@@ -65,22 +79,22 @@ namespace NowPlaying
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(Spotifybuttondisable)));
             }
         }
-        public string InputSpotifyToken
+        public string SpotifyConnectButton
         {
-            get { return _inputSpotifyToken; }
+            get { return _spotifyConnectButton; }
             set
             {
-                _inputSpotifyToken = value;
-                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(InputSpotifyToken)));
+                _spotifyConnectButton = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs(nameof(SpotifyConnectButton)));
             }
         }
-        public DelegateCommand SpotifyConnectButton
+        public DelegateCommand SpotifyAuth
         {
             get
             {
                 return new DelegateCommand(() =>
                 {
-                    OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SpotifyConnect"));
+                    OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SpotifyAuth"));
                 });
             }
         }

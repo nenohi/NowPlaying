@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -7,15 +8,16 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Timers;
 using Newtonsoft.Json;
+using Prism.Commands;
 using Prism.Mvvm;
 
 namespace NowPlaying
 {
     internal class MainModel : BindableBase
     {
-        private MainwindowViewModel _mainwindowViewModel = new MainwindowViewModel();
-        private SettingwindowViewModel _settingwindowViewModel = new SettingwindowViewModel();
-        private SettingWindow _settingWindow = new SettingWindow();
+        private MainwindowViewModel _mainwindowViewModel;
+        private SettingwindowViewModel _settingwindowViewModel;
+        private SettingWindow _settingWindow;
         private Spotify _spotify;
         private Misskey misskey = new Misskey();
         private bool _isAlwayTop = false;
@@ -66,8 +68,9 @@ namespace NowPlaying
             await RefreshPlayingView();
         }
 
-        public void ReadSetting()
+        public async Task ReadSetting()
         {
+            File.Decrypt("APISetting.json");
             using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
             {
                 string json = r.ReadToEnd();
@@ -75,12 +78,35 @@ namespace NowPlaying
                 if (items != null)
                 {
                     Spotify.ClientID = items.ClientID;
+                    if (items.SpotifyRefToken != string.Empty)
+                    {
+                        if(await Spotify.SetToken(items.SpotifyRefToken))
+                        {
+                            SettingwindowViewModel.Spotifybuttondisable = false;
+                            SettingwindowViewModel.SpotifyConnectButton = "Connected";
+                        }
+                    }
+                    if(items.MisskeyToken != string.Empty && items.MisskeyInstanceURL != string.Empty)
+                    {
+                        misskey.instanceurl = items.MisskeyInstanceURL;
+                        SettingwindowViewModel.InputMisskeyInstanceURL=items.MisskeyInstanceURL;
+                        misskey.i = items.MisskeyToken;
+                        SettingwindowViewModel.MisskeyButtonDisable = false;
+                        SettingwindowViewModel.MisskeyConnectButton = "Connected";
+                    }
+                    SettingwindowViewModel.IsAlwayTop = items.alwaytop;
+                    SettingwindowViewModel.MisskeyVisibility = items.MisskeyVisibility;
                 }
             }
         }
         public class Item
         {
             public string ClientID;
+            public string MisskeyToken;
+            public string MisskeyInstanceURL;
+            public string SpotifyRefToken;
+            public bool alwaytop;
+            public string MisskeyVisibility;
         }
         private async void MainwindowViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -101,15 +127,11 @@ namespace NowPlaying
                     _settingWindow.WindowState = System.Windows.WindowState.Normal;
                 }
             }
-            else if (propertys[0] == "SpotifyConnect")
+            else if (propertys[0] == "SpotifyAuth")
             {
                 if (!SettingwindowViewModel.Spotifybuttondisable) return;
                 SettingwindowViewModel.Spotifybuttondisable = false;
                 await Spotify.GetToken2();
-            }
-            else if (propertys[0] == "SpotifyConnectDone")
-            {
-                SettingwindowViewModel.Spotifybuttondisable = true;
             }
             else if (propertys[0] == "PlayingSend")
             {
@@ -121,7 +143,7 @@ namespace NowPlaying
                 }
                 catch
                 {
-                    await Spotify.RefreshToken();
+                    await Spotify.RefreshTokenFunc();
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
                 if (misskey.i == "") return;
@@ -200,5 +222,40 @@ namespace NowPlaying
                 }
             }
         }
+
+        public DelegateCommand WindowClosing
+        {
+            get
+            {
+                return new DelegateCommand(() =>
+                {
+                    using (System.IO.StreamWriter w = new System.IO.StreamWriter("APISetting.json"))
+                    {
+                        Item items = new Item()
+                        {
+                            ClientID = Spotify.ClientID ?? string.Empty,
+                            MisskeyToken = misskey.i ?? string.Empty,
+                            MisskeyInstanceURL = misskey.instanceurl ?? string.Empty,
+                            SpotifyRefToken = Spotify.RefreshToken ?? string.Empty,
+                            alwaytop = SettingwindowViewModel.IsAlwayTop,
+                            MisskeyVisibility = SettingwindowViewModel.MisskeyVisibility
+                        };
+
+                        var data = JsonConvert.SerializeObject(items);
+                        w.WriteLine(data);
+                        try
+                        {
+                            File.Encrypt("APISetting.json");
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                    Spotify.Dispose();
+                });
+            }
+        }
+
     }
 }
