@@ -96,7 +96,15 @@ namespace NowPlaying
         public async Task<CurrentlyPlaying> GetCurrentlyPlaying()
         {
             if (spotifyClient == null) return Playing;
-            Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            try
+            {
+                Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            }
+            catch (APIUnauthorizedException e)
+            {
+                await RefreshToken();
+                Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            }
             return Playing;
         }
 
