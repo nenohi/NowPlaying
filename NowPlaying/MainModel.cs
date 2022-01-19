@@ -262,6 +262,10 @@ namespace NowPlaying
                         }
                     }
                     Spotify.Dispose();
+                    if (SettingWindow != null || SettingWindow.Activate())
+                    {
+                        SettingWindow.Close();
+                    }
                 });
             }
         }
