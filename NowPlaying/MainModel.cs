@@ -57,10 +57,10 @@ namespace NowPlaying
             MainwindowViewModel = new MainwindowViewModel();
             SettingwindowViewModel = new SettingwindowViewModel();
             Spotify = new Spotify();
-            ReadSetting();
             MainwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
             SettingwindowViewModel.PropertyChanged += MainwindowViewModel_PropertyChanged;
             Spotify.refreshtimer.Elapsed += Refreshtimer_Elapsed;
+            ReadSetting();
         }
 
         private async void Refreshtimer_Elapsed(object? sender, ElapsedEventArgs e)
@@ -70,7 +70,14 @@ namespace NowPlaying
 
         public async Task ReadSetting()
         {
-            File.Decrypt("APISetting.json");
+            if (!File.Exists("APISetting.json"))
+            {
+                File.Copy("APISetting.json", "DefaultAPISetting.json");
+            }
+            else
+            {
+                File.Decrypt("APISetting.json");
+            }
             using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
             {
                 string json = r.ReadToEnd();
@@ -98,6 +105,7 @@ namespace NowPlaying
                     SettingwindowViewModel.MisskeyVisibility = items.MisskeyVisibility;
                 }
             }
+            File.Encrypt("APISetting.json");
         }
         public class Item
         {
@@ -229,6 +237,7 @@ namespace NowPlaying
             {
                 return new DelegateCommand(() =>
                 {
+                    File.Decrypt("APISetting.json");
                     using (System.IO.StreamWriter w = new System.IO.StreamWriter("APISetting.json"))
                     {
                         Item items = new Item()
