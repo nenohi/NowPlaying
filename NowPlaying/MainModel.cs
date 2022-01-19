@@ -262,7 +262,7 @@ namespace NowPlaying
                         }
                     }
                     Spotify.Dispose();
-                    if (SettingWindow != null || SettingWindow.Activate())
+                    if (SettingWindow != null)
                     {
                         SettingWindow.Close();
                     }
