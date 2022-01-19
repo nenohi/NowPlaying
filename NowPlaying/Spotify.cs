@@ -152,15 +152,17 @@ namespace NowPlaying
         }
         public async Task PlayResume()
         {
-            if (spotifyClient == null && Playing == null) return;
+            if (spotifyClient == null || Playing == null) return;
             //Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             if (Playing.IsPlaying)
             {
                 await spotifyClient.Player.PausePlayback();
+                Playing.IsPlaying = false;
             }
             else
             {
                 await spotifyClient.Player.ResumePlayback();
+                Playing.IsPlaying = true;
             }
         }
         public void Dispose()
