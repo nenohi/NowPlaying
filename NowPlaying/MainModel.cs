@@ -19,7 +19,7 @@ namespace NowPlaying
         private SettingwindowViewModel _settingwindowViewModel;
         private SettingWindow _settingWindow;
         private Spotify _spotify;
-        private Misskey misskey = new Misskey();
+        private Misskey misskey = new();
         private bool _isAlwayTop = false;
         public MainwindowViewModel MainwindowViewModel
         {
@@ -81,7 +81,7 @@ namespace NowPlaying
             using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
             {
                 string json = r.ReadToEnd();
-                Item items = JsonConvert.DeserializeObject<Item>(json);
+                Item? items = JsonConvert.DeserializeObject<Item>(json);
                 if (items != null)
                 {
                     Spotify.ClientID = items.ClientID;
@@ -116,12 +116,12 @@ namespace NowPlaying
         }
         public class Item
         {
-            public string ClientID;
-            public string MisskeyToken;
-            public string MisskeyInstanceURL;
-            public string SpotifyRefToken;
-            public bool alwaytop;
-            public string MisskeyVisibility;
+            public string ClientID = "";
+            public string MisskeyToken = "";
+            public string MisskeyInstanceURL = "";
+            public string SpotifyRefToken = "";
+            public bool alwaytop = false;
+            public string MisskeyVisibility = "Public";
         }
         private async void MainwindowViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -250,10 +250,10 @@ namespace NowPlaying
                     {
                         Item items = new Item()
                         {
-                            ClientID = Spotify.ClientID ?? string.Empty,
-                            MisskeyToken = misskey.i ?? string.Empty,
+                            ClientID = Spotify.ClientID,
+                            MisskeyToken = misskey.i,
                             MisskeyInstanceURL = misskey.instanceurl ?? string.Empty,
-                            SpotifyRefToken = Spotify.RefreshToken ?? string.Empty,
+                            SpotifyRefToken = Spotify.RefreshToken,
                             alwaytop = SettingwindowViewModel.IsAlwayTop,
                             MisskeyVisibility = SettingwindowViewModel.MisskeyVisibility
                         };
