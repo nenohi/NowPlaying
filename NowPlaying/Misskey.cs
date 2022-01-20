@@ -99,8 +99,9 @@ namespace NowPlaying
                     authSessionUserkeyRes = JsonConvert.DeserializeObject<AuthSessionUserkeyRes>(authseuserres);
                     i = authSessionUserkeyRes.accessToken;
                 }
-                catch
+                catch(Exception ex)
                 {
+                    NLogService.PrintErrorLog(ex, "Unknown Error By GetToken");
                     return false;
                 }
                 return true;
@@ -148,6 +149,24 @@ namespace NowPlaying
                 var response = await client.PostAsync(instanceurl + "/api/auth/session/userkey", content);
                 var res = await response.Content.ReadAsStringAsync();
                 return res;
+            }
+        }
+
+        public async Task<bool> CheckToken(string itoken)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                Dictionary<string, string> data = new Dictionary<string, string>();
+                data.Add("i", itoken);
+                var postjson = JsonConvert.SerializeObject(data);
+                var content = new StringContent(postjson, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(instanceurl + "/api/i", content);
+                if(response.IsSuccessStatusCode)
+                {
+                    i = itoken;
+                    return true;
+                }
+                return false;
             }
         }
 

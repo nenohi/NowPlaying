@@ -12,21 +12,29 @@ namespace NowPlaying
     {
         private static EmbedIOAuthServer _server2;
         private static EmbedIOAuthServer _server3;
-        private static SpotifyClient spotifyClient;
-        private static CurrentlyPlaying Playing;
+        private static SpotifyClient? spotifyClient;
+        private static CurrentlyPlaying? Playing;
         public static bool IsGetToken = false;
-        private string refreshtoken;
-        private string _clientID;
+        private string? refreshtoken;
+        private string? _clientID;
         public System.Timers.Timer refreshtimer = new System.Timers.Timer();
 
         public string ClientID
         {
-            get { return _clientID; }
+            get 
+            {
+                if (_clientID == null) return string.Empty;
+                return _clientID;
+            }
             set { _clientID = value; }
         }
         public string RefreshToken
         {
-            get { return refreshtoken; }
+            get 
+            {
+                if(refreshtoken == null) return string.Empty;
+                return refreshtoken;
+            }
         }
         public Spotify()
         {
@@ -56,8 +64,9 @@ namespace NowPlaying
                 IsGetToken = true;
                 await _server3.Stop();
             }
-            catch
+            catch(Exception ex)
             {
+                NLogService.PrintErrorLog(ex,"SpotifySetToken Error");
                 await _server3.Stop();
                 return false;
             }
@@ -117,7 +126,7 @@ namespace NowPlaying
             _server3 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
             await _server3.Start();
             var newResponse = await new OAuthClient().RequestToken(
-              new PKCETokenRefreshRequest(ClientID, refreshtoken)
+              new PKCETokenRefreshRequest(ClientID, RefreshToken)
             );
 
             spotifyClient = new SpotifyClient(newResponse.AccessToken);
@@ -134,8 +143,17 @@ namespace NowPlaying
             }
             catch (APIUnauthorizedException e)
             {
+                NLogService.PrintInfoLog(e,"SpotifyTokenRefresh by GetCurrentPlaying");
                 await RefreshTokenFunc();
                 Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            }
+            catch(APIException e)
+            {
+                NLogService.PrintErrorLog(e, "SpotifyAPIError by GetCurrentPlaying");
+            }
+            catch(Exception e)
+            {
+                NLogService.PrintErrorLog(e, "Unknown Error by GetCurrentPlaying");
             }
             return Playing;
         }
@@ -143,12 +161,34 @@ namespace NowPlaying
         public async Task NextSongs()
         {
             if (spotifyClient == null) return;
-            await spotifyClient.Player.SkipNext();
+            try
+            {
+                await spotifyClient.Player.SkipNext();
+            }
+            catch(APIException e)
+            {
+                NLogService.PrintErrorLog(e, "SpotifyAPIError by NextSongs");
+            }
+            catch (Exception e)
+            {
+                NLogService.PrintErrorLog(e, "Unknown Error by NextSongs");
+            }
         }
         public async Task PreviousSongs()
         {
             if (spotifyClient == null) return;
-            await spotifyClient.Player.SkipPrevious();
+            try
+            {
+                await spotifyClient.Player.SkipPrevious();
+            }
+            catch(APIException e)
+            {
+                NLogService.PrintErrorLog(e, "SpotifyAPIError by PreviousSongs");
+            }
+            catch (Exception e)
+            {
+                NLogService.PrintErrorLog(e, "Unknown Error by PreviousSongs");
+            }
         }
         public async Task PlayResume()
         {
