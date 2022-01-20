@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,7 @@ namespace NowPlaying
         private string _viewSong ="";
         private string _viewArtist="";
         private string _viewAlbum="";
+        private bool _isPlayingSendButton = true;
         public async Task ViewImageURL(string url)
         {
             using (var web = new System.Net.Http.HttpClient())
@@ -66,6 +67,15 @@ namespace NowPlaying
             {
                 _viewAlbum = value;
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("ViewAlbum"));
+            }
+        }
+        public bool IsPlayingSendButton
+        {
+            get { return _isPlayingSendButton; }
+            set
+            {
+                _isPlayingSendButton = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsPlayingSendButton"));
             }
         }
         public DelegateCommand OpenSettingWindow

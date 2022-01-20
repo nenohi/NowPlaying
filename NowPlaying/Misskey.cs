@@ -151,6 +151,24 @@ namespace NowPlaying
             }
         }
 
+        public async Task<bool> CheckToken(string itoken)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                Dictionary<string, string> data = new Dictionary<string, string>();
+                data.Add("i", itoken);
+                var postjson = JsonConvert.SerializeObject(data);
+                var content = new StringContent(postjson, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(instanceurl + "/api/i", content);
+                if(response.IsSuccessStatusCode)
+                {
+                    i = itoken;
+                    return true;
+                }
+                return false;
+            }
+        }
+
         public class AppCreate
         {
             public string name { get; set; }

@@ -97,9 +97,16 @@ namespace NowPlaying
                     {
                         misskey.instanceurl = items.MisskeyInstanceURL;
                         SettingwindowViewModel.InputMisskeyInstanceURL=items.MisskeyInstanceURL;
-                        misskey.i = items.MisskeyToken;
-                        SettingwindowViewModel.MisskeyButtonDisable = false;
-                        SettingwindowViewModel.MisskeyConnectButton = "Connected";
+                        if(await misskey.CheckToken(items.MisskeyToken))
+                        {
+                            SettingwindowViewModel.MisskeyButtonDisable = false;
+                            SettingwindowViewModel.MisskeyConnectButton = "Connected";
+                        }
+                        else
+                        {
+                            SettingwindowViewModel.MisskeyButtonDisable = true;
+                            SettingwindowViewModel.MisskeyConnectButton = "Connect";
+                        }
                     }
                     SettingwindowViewModel.IsAlwayTop = items.alwaytop;
                     SettingwindowViewModel.MisskeyVisibility = items.MisskeyVisibility;
@@ -144,6 +151,8 @@ namespace NowPlaying
             else if (propertys[0] == "PlayingSend")
             {
                 if (!Spotify.IsGetToken) return;
+                if (misskey.i == "") return;
+
                 SpotifyAPI.Web.CurrentlyPlaying playing;
                 try
                 {
@@ -154,7 +163,6 @@ namespace NowPlaying
                     await Spotify.RefreshTokenFunc();
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
-                if (misskey.i == "") return;
                 if (playing == null || playing.Item == null) return;
                 SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
                 string artists = "";
