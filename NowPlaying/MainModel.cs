@@ -10,6 +10,7 @@ using System.Timers;
 using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
+using NLog;
 
 namespace NowPlaying
 {
@@ -21,6 +22,7 @@ namespace NowPlaying
         private Spotify _spotify;
         private Misskey misskey = new();
         private bool _isAlwayTop = false;
+
         public MainwindowViewModel MainwindowViewModel
         {
             get { return _mainwindowViewModel; }
@@ -70,6 +72,7 @@ namespace NowPlaying
 
         public async Task ReadSetting()
         {
+            NLogService.PrintInfoLog("Loading SettingFile");
             if (!File.Exists("APISetting.json"))
             {
                 File.Copy("APISetting.json", "DefaultAPISetting.json");
@@ -87,20 +90,22 @@ namespace NowPlaying
                     Spotify.ClientID = items.ClientID;
                     if (items.SpotifyRefToken != string.Empty)
                     {
-                        if(await Spotify.SetToken(items.SpotifyRefToken))
+                        if (await Spotify.SetToken(items.SpotifyRefToken))
                         {
                             SettingwindowViewModel.Spotifybuttondisable = false;
                             SettingwindowViewModel.SpotifyConnectButton = "Connected";
+                            NLogService.PrintInfoLog("Spotify Token OK");
                         }
                     }
-                    if(items.MisskeyToken != string.Empty && items.MisskeyInstanceURL != string.Empty)
+                    if (items.MisskeyToken != string.Empty && items.MisskeyInstanceURL != string.Empty)
                     {
                         misskey.instanceurl = items.MisskeyInstanceURL;
-                        SettingwindowViewModel.InputMisskeyInstanceURL=items.MisskeyInstanceURL;
-                        if(await misskey.CheckToken(items.MisskeyToken))
+                        SettingwindowViewModel.InputMisskeyInstanceURL = items.MisskeyInstanceURL;
+                        if (await misskey.CheckToken(items.MisskeyToken))
                         {
                             SettingwindowViewModel.MisskeyButtonDisable = false;
                             SettingwindowViewModel.MisskeyConnectButton = "Connected";
+                            NLogService.PrintInfoLog("MisskeyInstance Connected");
                         }
                         else
                         {
@@ -113,6 +118,7 @@ namespace NowPlaying
                 }
             }
             File.Encrypt("APISetting.json");
+            NLogService.PrintInfoLog("Loading SettingFile Done");
         }
         public class Item
         {
@@ -158,8 +164,9 @@ namespace NowPlaying
                 {
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    NLogService.PrintInfoLog("SpotifyTokenRefresh");
                     await Spotify.RefreshTokenFunc();
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
@@ -180,7 +187,7 @@ namespace NowPlaying
             {
                 if (SettingwindowViewModel.InputMisskeyInstanceURL == string.Empty) return;
                 bool res = await misskey.GetToken(SettingwindowViewModel.InputMisskeyInstanceURL);
-                if(misskey.i != string.Empty)
+                if (misskey.i != string.Empty)
                 {
                     SettingwindowViewModel.MisskeyConnectButton = "Connected";
                 }
@@ -246,6 +253,7 @@ namespace NowPlaying
                 return new DelegateCommand(() =>
                 {
                     File.Decrypt("APISetting.json");
+                    NLogService.PrintInfoLog("Saving SettingFile");
                     using (System.IO.StreamWriter w = new System.IO.StreamWriter("APISetting.json"))
                     {
                         Item items = new Item()
@@ -264,9 +272,9 @@ namespace NowPlaying
                         {
                             File.Encrypt("APISetting.json");
                         }
-                        catch
+                        catch (Exception e)
                         {
-
+                            NLogService.PrintErrorLog(e, "APISettingFile Encrypte");
                         }
                     }
                     Spotify.Dispose();
@@ -274,9 +282,36 @@ namespace NowPlaying
                     {
                         SettingWindow.Close();
                     }
+                    NLogService.PrintInfoLog("Saving SettingFile Done");
                 });
             }
         }
 
+    }
+    public static class NLogService
+    {
+
+        private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        public static void PrintInfoLog(string str)
+        {
+            logger.Info(str);
+        }
+        public static void PrintInfoLog(Exception ex, string str)
+        {
+            logger.Info(ex, str);
+        }
+        public static void PrintErrorLog(Exception ex, string str)
+        {
+            logger.Error(ex, str);
+        }
+        public static void PrintDebugLog(string str)
+        {
+            logger.Debug(str);
+        }
+        public static void PrintDebugLog(Exception ex,string str)
+        {
+            logger.Debug(ex,str);
+        }
     }
 }

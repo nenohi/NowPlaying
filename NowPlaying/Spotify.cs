@@ -64,8 +64,9 @@ namespace NowPlaying
                 IsGetToken = true;
                 await _server3.Stop();
             }
-            catch
+            catch(Exception ex)
             {
+                NLogService.PrintErrorLog(ex,"SpotifySetToken Error");
                 await _server3.Stop();
                 return false;
             }
@@ -142,16 +143,17 @@ namespace NowPlaying
             }
             catch (APIUnauthorizedException e)
             {
+                NLogService.PrintInfoLog(e,"SpotifyTokenRefresh by GetCurrentPlaying");
                 await RefreshTokenFunc();
                 Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             }
             catch(APIException e)
             {
-                
+                NLogService.PrintErrorLog(e, "SpotifyAPIError by GetCurrentPlaying");
             }
             catch(Exception e)
             {
-
+                NLogService.PrintErrorLog(e, "Unknown Error by GetCurrentPlaying");
             }
             return Playing;
         }
@@ -165,11 +167,11 @@ namespace NowPlaying
             }
             catch(APIException e)
             {
-
+                NLogService.PrintErrorLog(e, "SpotifyAPIError by NextSongs");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-
+                NLogService.PrintErrorLog(e, "Unknown Error by NextSongs");
             }
         }
         public async Task PreviousSongs()
@@ -181,11 +183,11 @@ namespace NowPlaying
             }
             catch(APIException e)
             {
-
+                NLogService.PrintErrorLog(e, "SpotifyAPIError by PreviousSongs");
             }
             catch (Exception e)
             {
-
+                NLogService.PrintErrorLog(e, "Unknown Error by PreviousSongs");
             }
         }
         public async Task PlayResume()

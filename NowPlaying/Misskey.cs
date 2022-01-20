@@ -99,8 +99,9 @@ namespace NowPlaying
                     authSessionUserkeyRes = JsonConvert.DeserializeObject<AuthSessionUserkeyRes>(authseuserres);
                     i = authSessionUserkeyRes.accessToken;
                 }
-                catch
+                catch(Exception ex)
                 {
+                    NLogService.PrintErrorLog(ex, "Unknown Error By GetToken");
                     return false;
                 }
                 return true;
