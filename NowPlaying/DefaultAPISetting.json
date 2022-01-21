@@ -4,5 +4,7 @@
   "MisskeyInstanceURL": "",
   "SpotifyRefToken": "",
   "alwaytop": false,
-  "MisskeyVisibility": "public"
+  "MisskeyVisibility": "public",
+  "BackgroundColor": "White",
+  "ForegroundColorText": "Black"
 }

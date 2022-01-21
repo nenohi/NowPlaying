@@ -6,10 +6,11 @@
         xmlns:local="clr-namespace:NowPlaying"
         mc:Ignorable="d"
         Title="SettingWindow" Height="218" Width="428" ResizeMode="NoResize">
-    <Grid>
+    <Grid Background="{Binding SettingBackgroundColor}">
         <TabControl>
-            <TabItem Header="アカウント連携">
-                <Grid Background="#FFE5E5E5">
+            <TabItem Header="Account" Foreground="{Binding SettingForegroundColor}">
+                
+                <Grid Background="{Binding SettingBackgroundColor}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -22,19 +23,19 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <Label Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalContentAlignment="Center" Content="MisskeyInstance" />
-                    <Grid Grid.Column="1">
-                        <TextBox Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding InputMisskeyInstanceURL, UpdateSourceTrigger=LostFocus}" />
+                    <Label Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" VerticalContentAlignment="Center" Content="MisskeyInstance" Foreground="{Binding SettingForegroundColor}"/>
+                    <Grid Grid.Column="1" Background="{Binding SettingBackgroundColor}">
+                        <TextBox Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding InputMisskeyInstanceURL, UpdateSourceTrigger=LostFocus}"/>
                     </Grid>
                     <ComboBox Grid.Column="2" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" ItemsSource="{Binding MisskeyVisibilitys}" SelectedValue="{Binding MisskeyVisibility, UpdateSourceTrigger=Default, Mode=TwoWay}" DisplayMemberPath="Value" SelectedValuePath="Value"/>
                     <Button Grid.Column="3" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Center" Command="{Binding MisskeyAuth}" Content="{Binding MisskeyConnectButton}" IsEnabled="{Binding MisskeyButtonDisable}"/>
-                    <Label Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalContentAlignment="Center" Content="SpotifyConnect" />
+                    <Label Grid.Column="0" Grid.Row="1" HorizontalAlignment="Center" VerticalContentAlignment="Center" Content="SpotifyConnect"  Foreground="{Binding SettingForegroundColor}"/>
                     <Button Grid.Column="1" Grid.Row="1" Height="25" Width="100" Content="{Binding SpotifyConnectButton}" Command="{Binding SpotifyAuth}" IsEnabled="{Binding Spotifybuttondisable, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"/>
 
                 </Grid>
             </TabItem>
-            <TabItem Header="UI">
-                <Grid Background="#FFE5E5E5">
+            <TabItem Header="UI"  Foreground="{Binding SettingForegroundColor}">
+                <Grid Background="{Binding SettingBackgroundColor}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
@@ -47,7 +48,11 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <CheckBox Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.ColumnSpan="2" Content="常に最前面に表示する" IsChecked="{Binding IsAlwayTop}"/>
+                    <CheckBox Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.ColumnSpan="2" Content="常に最前面に表示する" IsChecked="{Binding IsAlwayTop}"  Foreground="{Binding SettingForegroundColor}"/>
+                    <Label Grid.Column="0" Grid.Row="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Content="BackgroundColor" Foreground="{Binding SettingForegroundColor}"/>
+                    <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding SettingBackgroundColorText,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    <Label Grid.Column="0" Grid.Row="2" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Content="ForegroundColor" Foreground="{Binding SettingForegroundColor}"/>
+                    <TextBox Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding SettingForegroundColorText, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                 </Grid>
             </TabItem>
         </TabControl>

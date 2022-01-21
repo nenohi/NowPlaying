@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
 using NLog;
+using System.Windows.Media;
 
 namespace NowPlaying
 {
@@ -22,7 +23,8 @@ namespace NowPlaying
         private Spotify _spotify;
         private Misskey misskey = new();
         private bool _isAlwayTop = false;
-
+        private Brush _mainBackgroundColor = Brushes.White;
+        private Brush __mainForegroundColor = Brushes.Black;
         public MainwindowViewModel MainwindowViewModel
         {
             get { return _mainwindowViewModel; }
@@ -43,7 +45,24 @@ namespace NowPlaying
             get { return _spotify; }
             set { _spotify = value; }
         }
-
+        public Brush MainBackgroundColor
+        {
+            get { return _mainBackgroundColor; }
+            set
+            {
+                _mainBackgroundColor = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MainBackgroundColor"));
+            }
+        }
+        public Brush MainForegroundColor
+        {
+            get { return __mainForegroundColor; }
+            set
+            {
+                __mainForegroundColor = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MainForegroundColor"));
+            }
+        }
         public bool IsAlwayTop
         {
             get { return _isAlwayTop; }
@@ -81,7 +100,7 @@ namespace NowPlaying
             {
                 File.Decrypt("APISetting.json");
             }
-            using (System.IO.StreamReader r = new System.IO.StreamReader("APISetting.json"))
+            using (StreamReader r = new StreamReader("APISetting.json"))
             {
                 string json = r.ReadToEnd();
                 Item? items = JsonConvert.DeserializeObject<Item>(json);
@@ -115,6 +134,8 @@ namespace NowPlaying
                     }
                     SettingwindowViewModel.IsAlwayTop = items.alwaytop;
                     SettingwindowViewModel.MisskeyVisibility = items.MisskeyVisibility;
+                    SettingwindowViewModel.SettingBackgroundColorText = items.BackgroundColorText;
+                    SettingwindowViewModel.SettingForegroundColorText = items.ForegroundColorText;
                 }
             }
             File.Encrypt("APISetting.json");
@@ -128,6 +149,8 @@ namespace NowPlaying
             public string SpotifyRefToken = "";
             public bool alwaytop = false;
             public string MisskeyVisibility = "Public";
+            public string BackgroundColorText = "White";
+            public string ForegroundColorText = "Black";
         }
         private async void MainwindowViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -217,6 +240,16 @@ namespace NowPlaying
                         break;
                 }
             }
+            else if (propertys[0] == "SettingBackgroundColor")
+            {
+                MainBackgroundColor = SettingwindowViewModel.SettingBackgroundColor;
+                MainwindowViewModel.MainBackgroundColor = SettingwindowViewModel.SettingBackgroundColor;
+            }
+            else if (propertys[0] == "SettingForegroundColor")
+            {
+                MainForegroundColor = SettingwindowViewModel.SettingForegroundColor;
+                MainwindowViewModel.MainForegroundColor = SettingwindowViewModel.SettingForegroundColor;
+            }
         }
         public async Task RefreshPlayingView()
         {
@@ -254,7 +287,7 @@ namespace NowPlaying
                 {
                     File.Decrypt("APISetting.json");
                     NLogService.PrintInfoLog("Saving SettingFile");
-                    using (System.IO.StreamWriter w = new System.IO.StreamWriter("APISetting.json"))
+                    using (StreamWriter w = new StreamWriter("APISetting.json"))
                     {
                         Item items = new Item()
                         {
@@ -263,7 +296,9 @@ namespace NowPlaying
                             MisskeyInstanceURL = misskey.instanceurl ?? string.Empty,
                             SpotifyRefToken = Spotify.RefreshToken,
                             alwaytop = SettingwindowViewModel.IsAlwayTop,
-                            MisskeyVisibility = SettingwindowViewModel.MisskeyVisibility
+                            MisskeyVisibility = SettingwindowViewModel.MisskeyVisibility,
+                            BackgroundColorText = SettingwindowViewModel.SettingBackgroundColorText,
+                            ForegroundColorText = SettingwindowViewModel.SettingForegroundColorText,
                         };
 
                         var data = JsonConvert.SerializeObject(items);
@@ -283,6 +318,7 @@ namespace NowPlaying
                         SettingWindow.Close();
                     }
                     NLogService.PrintInfoLog("Saving SettingFile Done");
+                    NLogService.Dispose();
                 });
             }
         }
@@ -309,9 +345,13 @@ namespace NowPlaying
         {
             logger.Debug(str);
         }
-        public static void PrintDebugLog(Exception ex,string str)
+        public static void PrintDebugLog(Exception ex, string str)
         {
-            logger.Debug(ex,str);
+            logger.Debug(ex, str);
+        }
+        public static void Dispose()
+        {
+            NLog.LogManager.Shutdown();
         }
     }
 }

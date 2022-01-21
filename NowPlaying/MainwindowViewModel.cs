@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using Prism.Mvvm;
 using Prism.Commands;
+using System.Windows.Media;
 
 namespace NowPlaying
 {
@@ -16,6 +17,8 @@ namespace NowPlaying
         private string _viewArtist="";
         private string _viewAlbum="";
         private bool _isPlayingSendButton = true;
+        private Brush _mainForegroundColor = Brushes.Black;
+        private Brush _mainBackgroundColor = Brushes.White;
         public async Task ViewImageURL(string url)
         {
             using (var web = new System.Net.Http.HttpClient())
@@ -107,6 +110,24 @@ namespace NowPlaying
                 {
                     OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("PlayerControlCommand-" + par));
                 });
+            }
+        }
+        public Brush MainForegroundColor
+        {
+            get { return _mainForegroundColor; }
+            set
+            {
+                _mainForegroundColor = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MainForegroundColor"));
+            }
+        }
+        public Brush MainBackgroundColor
+        {
+            get { return _mainBackgroundColor; }
+            set
+            {
+                _mainBackgroundColor = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MainBackgroundColor"));
             }
         }
     }
