@@ -20,6 +20,9 @@ namespace NowPlaying
         private Brush _foreground = Brushes.Black;
         private string _backgroundColorText = string.Empty;
         private string _foregroundText = string.Empty;
+        private bool _isautoChangeColor = false;
+        private Brush _autoChangeBackgroundColor = Brushes.White;
+        private Brush _autoChangeForegroundColor = Brushes.Black;
         private Dictionary<int, string> _misskeyVisibilitys = new Dictionary<int, string>()
         {
             {0,"public"},
@@ -126,7 +129,11 @@ namespace NowPlaying
 
         public Brush SettingBackgroundColor
         {
-            get { return _backgroundColor; }
+            get
+            {
+                if (IsAutoChangeColor) return _autoChangeBackgroundColor;
+                return _backgroundColor;
+            }
             set
             {
                 _backgroundColor = value;
@@ -135,13 +142,18 @@ namespace NowPlaying
         }
         public Brush SettingForegroundColor
         {
-            get { return _foreground; }
+            get
+            {
+                if (IsAutoChangeColor) return _autoChangeForegroundColor;
+                return _foreground;
+            }
             set
             {
                 _foreground = value;
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingForegroundColor"));
             }
         }
+
         public string SettingBackgroundColorText
         {
             get { return _backgroundColorText; }
@@ -173,15 +185,52 @@ namespace NowPlaying
                 try
                 {
                     var color = (SolidColorBrush?)new BrushConverter().ConvertFromString(_foregroundText);
-                    if(color != null)
+                    if (color != null)
                     {
                         SettingForegroundColor = color;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
 
                 }
+            }
+        }
+        public bool IsAutoChangeColor
+        {
+            get { return _isautoChangeColor; }
+            set
+            {
+                _isautoChangeColor = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsAutoChangeColor"));
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsColorSettingText"));
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingBackgroundColor"));
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingForegroundColor"));
+            }
+        }
+        public Brush AutoChangeBackgroundColor
+        {
+            get { return _autoChangeBackgroundColor; }
+            set
+            {
+                _autoChangeBackgroundColor = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingBackgroundColor"));
+            }
+        }
+        public Brush AutoChangeForegroundColor
+        {
+            get { return _autoChangeForegroundColor; }
+            set
+            {
+                _autoChangeForegroundColor = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingForegroundColor"));
+            }
+        }
+        public bool IsColorSettingText
+        {
+            get
+            {
+                return !IsAutoChangeColor;
             }
         }
     }
