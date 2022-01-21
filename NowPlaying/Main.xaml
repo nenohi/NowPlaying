@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:NowPlaying"
              mc:Ignorable="d" 
              d:DesignHeight="250" d:DesignWidth="500" DataContext="{Binding MainwindowViewModel}">
-    <Grid>
+    <Grid Background="{Binding MainBackgroundColor}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.6*"/>
             <ColumnDefinition Width="2*"/>
@@ -29,18 +29,18 @@
                 <RowDefinition Height="0.6*"/>
                 <RowDefinition Height="0.2*"/>
             </Grid.RowDefinitions>
-            <Label Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="1" Content="Song"/>
-            <Label Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" VerticalContentAlignment="Top">
+            <Label Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="1" Content="Song" Foreground="{Binding MainForegroundColor}"/>
+            <Label Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="2" VerticalContentAlignment="Top" Foreground="{Binding MainForegroundColor}">
                 <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding ViewSong}"/>
             </Label>
 
-            <Label Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Content="Artist"/>
-            <Label Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" VerticalContentAlignment="Top">
+            <Label Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="1" Content="Artist" Foreground="{Binding MainForegroundColor}"/>
+            <Label Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="2" VerticalContentAlignment="Top" Foreground="{Binding MainForegroundColor}">
                 <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding ViewArtist}"/>
             </Label>
 
-            <Label Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="1" Content="Album"/>
-            <Label Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" VerticalContentAlignment="Top">
+            <Label Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="1" Content="Album" Foreground="{Binding MainForegroundColor}"/>
+            <Label Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="2" VerticalContentAlignment="Top" Foreground="{Binding MainForegroundColor}">
                 <TextBlock TextWrapping="WrapWithOverflow" Text="{Binding ViewAlbum}"/>
             </Label>
 
