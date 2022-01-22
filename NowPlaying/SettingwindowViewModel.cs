@@ -10,20 +10,21 @@ namespace NowPlaying
 {
     internal class SettingwindowViewModel : BindableBase
     {
-        private string _inputMisskeyInstanceURL = "";
-        private bool _spotifybuttondisable = true;
-        private bool _misskeyButtonDisable = true;
-        private string _spotifyConnectButton = "Connect";
-        private string _misskeyVisibility = "";
-        private bool _IsAlwayTop = false;
-        private Brush _backgroundColor = Brushes.White;
-        private Brush _foreground = Brushes.Black;
-        private string _backgroundColorText = string.Empty;
-        private string _foregroundText = string.Empty;
-        private bool _isautoChangeColor = false;
-        private Brush _autoChangeBackgroundColor = Brushes.White;
-        private Brush _autoChangeForegroundColor = Brushes.Black;
-        private Dictionary<int, string> _misskeyVisibilitys = new Dictionary<int, string>()
+        private bool _spotifybuttondisable { get; set; } = true;
+        private bool _misskeyButtonDisable { get; set; } = true;
+        private bool _IsAlwayTop { get; set; } = false;
+        private bool _isautoChangeColor { get; set; } = false;
+        private string _inputMisskeyInstanceURL { get; set; } = "";
+        private string _misskeyVisibility { get; set; } = "";
+        private string _spotifyConnectButton { get; set; } = "Connect";
+        private string _backgroundColorText { get; set; } = string.Empty;
+        private string _foregroundText { get; set; } = string.Empty;
+        private string _settingPostDataText { get; set; } = "Song:${Song}\nArtist:${Artist}\nAlbum:${Album}\n";
+        private Brush _backgroundColor { get; set; } = Brushes.White;
+        private Brush _foreground { get; set; } = Brushes.Black;
+        private Brush _autoChangeBackgroundColor { get; set; } = Brushes.White;
+        private Brush _autoChangeForegroundColor { get; set; } = Brushes.Black;
+        private Dictionary<int, string> _misskeyVisibilitys { get; } = new Dictionary<int, string>()
         {
             {0,"public"},
             {1,"home" },
@@ -116,7 +117,16 @@ namespace NowPlaying
                 });
             }
         }
-
+        public DelegateCommand SettingCheckPostButton
+        {
+            get
+            {
+                return new DelegateCommand(() =>
+                {
+                    OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingCheckPostButton"));
+                });
+            }
+        }
         public bool IsAlwayTop
         {
             get { return _IsAlwayTop; }
@@ -194,6 +204,16 @@ namespace NowPlaying
                 {
 
                 }
+            }
+        }
+        public string SettingPostDataText
+        {
+            get { return _settingPostDataText; }
+            set
+            {
+                _settingPostDataText = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingPostDataText"));
+                
             }
         }
         public bool IsAutoChangeColor

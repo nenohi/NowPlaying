@@ -56,6 +56,44 @@
                     <CheckBox Grid.Column="0" Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.ColumnSpan="2" Content="AutoChangeBackgroundColor" IsChecked="{Binding IsAutoChangeColor}" Foreground="{Binding SettingForegroundColor}"/>
                 </Grid>
             </TabItem>
+            <TabItem Header="PostData"  Foreground="{Binding SettingForegroundColor}">
+                <Grid Background="{Binding SettingBackgroundColor}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="0.4*"/>
+                    </Grid.RowDefinitions>
+                    <Grid Background="{Binding SettingBackgroundColor}" Grid.ColumnSpan="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0" Content="Artist:${Artist}" Foreground="{Binding SettingForegroundColor}"/>
+                        <Label Grid.Column="0" Grid.Row="1" Content="Song:${Song}" Foreground="{Binding SettingForegroundColor}"/>
+                        <Label Grid.Column="1" Grid.Row="0" Content="Album:${Album}" Foreground="{Binding SettingForegroundColor}"/>
+                        <!--
+                        <Label Grid.Column="1" Grid.Row="0" Content="ArtistURL:${ArtistURL}"/>
+                        <Label Grid.Column="1" Grid.Row="2" Content="AlbumURL:${AlbumURL}"/>
+                        <Label Grid.Column="1" Grid.Row="1" Content="SongURL:${SongURL}"/>
+                        <Label Grid.Column="2" Grid.Row="0" Content="Artist:${Artist}"/>
+                        <Label Grid.Column="2" Grid.Row="1" Content="Artist:${Artist}"/>
+                        <Label Grid.Column="2" Grid.Row="2" Content="Artist:${Artist}"/>
+                        -->
+                    </Grid>
+                    <TextBox Grid.ColumnSpan="2" Grid.Row="1" Background="{Binding SettingBackgoundColor}" Foreground="{Binding SettingForegroundColor}" Text="{Binding SettingPostDataText, UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}" AcceptsReturn="True">
+                    </TextBox>
+                    <Button Grid.Column="2" Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" Content="CheckPost(specified)" Command="{Binding SettingCheckPostButton}"/>
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
 </Window>

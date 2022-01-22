@@ -260,6 +260,35 @@ namespace NowPlaying
                 SettingwindowViewModel.AutoChangeBackgroundColor = MainwindowViewModel.ImageAverageBackgroundColor;
 
             }
+            else if(propertys[0] == "SettingCheckPostButton")
+            {
+                if (!Spotify.IsGetToken) return;
+                if (misskey.i == "") return;
+
+                SpotifyAPI.Web.CurrentlyPlaying playing;
+                try
+                {
+                    playing = await Spotify.GetCurrentlyPlaying();
+                }
+                catch (Exception ex)
+                {
+                    NLogService.PrintInfoLog("SpotifyTokenRefresh");
+                    await Spotify.RefreshTokenFunc();
+                    playing = await Spotify.GetCurrentlyPlaying();
+                }
+                if (playing == null || playing.Item == null) return;
+                SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
+                string artists = "";
+                foreach (var artist in track.Artists)
+                {
+                    artists += "?[" + artist.Name + "](" + artist.ExternalUrls.FirstOrDefault().Value + ")";
+                }
+                string Song = "[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")";
+                string Album = "?[" + track.Album.Name + "](" + track.Album.ExternalUrls["spotify"] + ")";
+                string txt = SettingwindowViewModel.SettingPostDataText;
+                txt = txt.Replace("${Artist}", artists).Replace("${Song}",Song).Replace("${Album}",Album);
+                await misskey.PostNote(txt.Trim() + "\n#NowPlaying", "specified");
+            }
         }
         public async Task RefreshPlayingView()
         {
