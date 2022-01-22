@@ -6,5 +6,6 @@
   "alwaytop": false,
   "MisskeyVisibility": "public",
   "BackgroundColor": "White",
-  "ForegroundColorText": "Black"
+  "ForegroundColorText": "Black",
+  "AutoChangeColor": false
 }

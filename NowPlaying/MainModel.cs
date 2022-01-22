@@ -23,8 +23,6 @@ namespace NowPlaying
         private Spotify _spotify;
         private Misskey misskey = new();
         private bool _isAlwayTop = false;
-        private Brush _mainBackgroundColor = Brushes.White;
-        private Brush __mainForegroundColor = Brushes.Black;
         public MainwindowViewModel MainwindowViewModel
         {
             get { return _mainwindowViewModel; }
@@ -44,24 +42,6 @@ namespace NowPlaying
         {
             get { return _spotify; }
             set { _spotify = value; }
-        }
-        public Brush MainBackgroundColor
-        {
-            get { return _mainBackgroundColor; }
-            set
-            {
-                _mainBackgroundColor = value;
-                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MainBackgroundColor"));
-            }
-        }
-        public Brush MainForegroundColor
-        {
-            get { return __mainForegroundColor; }
-            set
-            {
-                __mainForegroundColor = value;
-                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("MainForegroundColor"));
-            }
         }
         public bool IsAlwayTop
         {
@@ -86,6 +66,14 @@ namespace NowPlaying
 
         private async void Refreshtimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
+            if (!Spotify.IsGetToken)
+            {
+                SettingwindowViewModel.Spotifybuttondisable = true;
+            }
+            else
+            {
+                SettingwindowViewModel.Spotifybuttondisable = false;
+            }
             await RefreshPlayingView();
         }
 
@@ -136,6 +124,7 @@ namespace NowPlaying
                     SettingwindowViewModel.MisskeyVisibility = items.MisskeyVisibility;
                     SettingwindowViewModel.SettingBackgroundColorText = items.BackgroundColorText;
                     SettingwindowViewModel.SettingForegroundColorText = items.ForegroundColorText;
+                    SettingwindowViewModel.IsAutoChangeColor = items.AutoChangeColor;
                 }
             }
             File.Encrypt("APISetting.json");
@@ -151,6 +140,7 @@ namespace NowPlaying
             public string MisskeyVisibility = "Public";
             public string BackgroundColorText = "White";
             public string ForegroundColorText = "Black";
+            public bool AutoChangeColor = false;
         }
         private async void MainwindowViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -242,13 +232,33 @@ namespace NowPlaying
             }
             else if (propertys[0] == "SettingBackgroundColor")
             {
-                MainBackgroundColor = SettingwindowViewModel.SettingBackgroundColor;
                 MainwindowViewModel.MainBackgroundColor = SettingwindowViewModel.SettingBackgroundColor;
             }
             else if (propertys[0] == "SettingForegroundColor")
             {
-                MainForegroundColor = SettingwindowViewModel.SettingForegroundColor;
                 MainwindowViewModel.MainForegroundColor = SettingwindowViewModel.SettingForegroundColor;
+            }
+            else if (propertys[0] == "ImageAverageBackgroundColor")
+            {
+                if (SettingwindowViewModel.IsAutoChangeColor)
+                {
+                    SettingwindowViewModel.AutoChangeBackgroundColor = MainwindowViewModel.ImageAverageBackgroundColor;
+                }
+            }
+            else if (propertys[0] == "ImageAverageForegroundColor")
+            {
+                if (SettingwindowViewModel.IsAutoChangeColor)
+                {
+                    SettingwindowViewModel.AutoChangeForegroundColor = MainwindowViewModel.ImageAverageForegroundColor;
+
+                }
+            }
+            else if (propertys[0] == "IsAutoChangeColor")
+            {
+                MainwindowViewModel.AutoChangeColor = SettingwindowViewModel.IsAutoChangeColor;
+                SettingwindowViewModel.AutoChangeForegroundColor = MainwindowViewModel.ImageAverageForegroundColor;
+                SettingwindowViewModel.AutoChangeBackgroundColor = MainwindowViewModel.ImageAverageBackgroundColor;
+
             }
         }
         public async Task RefreshPlayingView()
@@ -299,6 +309,7 @@ namespace NowPlaying
                             MisskeyVisibility = SettingwindowViewModel.MisskeyVisibility,
                             BackgroundColorText = SettingwindowViewModel.SettingBackgroundColorText,
                             ForegroundColorText = SettingwindowViewModel.SettingForegroundColorText,
+                            AutoChangeColor = SettingwindowViewModel.IsAutoChangeColor,
                         };
 
                         var data = JsonConvert.SerializeObject(items);

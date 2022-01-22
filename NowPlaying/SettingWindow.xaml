@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NowPlaying"
         mc:Ignorable="d"
-        Title="SettingWindow" Height="218" Width="428" ResizeMode="NoResize">
+        Title="SettingWindow" Height="218" Width="428" ResizeMode="NoResize" Topmost="{Binding IsAlwayTop}">
     <Grid Background="{Binding SettingBackgroundColor}">
         <TabControl>
             <TabItem Header="Account" Foreground="{Binding SettingForegroundColor}">
@@ -50,9 +50,10 @@
                     </Grid.RowDefinitions>
                     <CheckBox Grid.Column="0" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.ColumnSpan="2" Content="常に最前面に表示する" IsChecked="{Binding IsAlwayTop}"  Foreground="{Binding SettingForegroundColor}"/>
                     <Label Grid.Column="0" Grid.Row="1" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Content="BackgroundColor" Foreground="{Binding SettingForegroundColor}"/>
-                    <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding SettingBackgroundColorText,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding SettingBackgroundColorText,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsColorSettingText}"/>
                     <Label Grid.Column="0" Grid.Row="2" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Content="ForegroundColor" Foreground="{Binding SettingForegroundColor}"/>
-                    <TextBox Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding SettingForegroundColorText, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Grid.Column="1" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Text="{Binding SettingForegroundColorText, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsColorSettingText}"/>
+                    <CheckBox Grid.Column="0" Grid.Row="3" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.ColumnSpan="2" Content="AutoChangeBackgroundColor" IsChecked="{Binding IsAutoChangeColor}" Foreground="{Binding SettingForegroundColor}"/>
                 </Grid>
             </TabItem>
         </TabControl>
