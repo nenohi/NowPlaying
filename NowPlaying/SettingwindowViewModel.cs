@@ -204,8 +204,6 @@ namespace NowPlaying
                 _isautoChangeColor = value;
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsAutoChangeColor"));
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsColorSettingText"));
-                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingBackgroundColor"));
-                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingForegroundColor"));
             }
         }
         public Brush AutoChangeBackgroundColor

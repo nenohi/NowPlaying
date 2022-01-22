@@ -66,6 +66,14 @@ namespace NowPlaying
 
         private async void Refreshtimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
+            if (!Spotify.IsGetToken)
+            {
+                SettingwindowViewModel.Spotifybuttondisable = true;
+            }
+            else
+            {
+                SettingwindowViewModel.Spotifybuttondisable = false;
+            }
             await RefreshPlayingView();
         }
 
@@ -248,6 +256,9 @@ namespace NowPlaying
             else if (propertys[0] == "IsAutoChangeColor")
             {
                 MainwindowViewModel.AutoChangeColor = SettingwindowViewModel.IsAutoChangeColor;
+                SettingwindowViewModel.AutoChangeForegroundColor = MainwindowViewModel.ImageAverageForegroundColor;
+                SettingwindowViewModel.AutoChangeBackgroundColor = MainwindowViewModel.ImageAverageBackgroundColor;
+
             }
         }
         public async Task RefreshPlayingView()
