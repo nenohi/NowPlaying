@@ -16,11 +16,32 @@ namespace NowPlaying
         public string instanceurl { get; set; } = "https://misskey.io";
         private string appSecret { get; set; } = string.Empty;
         private string token { get; set; } = string.Empty;
-        public async Task PostNote(string Text, string Visibility)
+        public SpotifyAPI.Web.FullTrack Postedtrack { get; set; } = new SpotifyAPI.Web.FullTrack();
+
+        public async Task PostNote(string Text, string Visibility, SpotifyAPI.Web.CurrentlyPlaying playing)
         {
             if (i == String.Empty) return;
+            SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
+            if(Postedtrack.Artists != null && track.Artists != null)
+            {
+                if (track.Artists[0].Name == Postedtrack.Artists[0].Name && track.Name == Postedtrack.Name && Visibility != "specified") return;
+            }
+            string artists = "";
+            foreach (var artist in track.Artists)
+            {
+                artists += "?[" + artist.Name + "](" + artist.ExternalUrls.FirstOrDefault().Value + ")";
+            }
+            string txt = Text;
+            string Song = "[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")";
+            string Album = "?[" + track.Album.Name + "](" + track.Album.ExternalUrls["spotify"] + ")";
+            string Playlist = string.Empty;
+            if (playing.Context != null && playing.Context.Type == "playlist")
+            {
+                Playlist = playing.Context.ExternalUrls["spotify"];
+            }
+            txt = txt.Replace("${Artist}", artists).Replace("${Song}", Song).Replace("${Album}", Album).Replace("${PlaylistURL}", Playlist) + "\n#NowPlaying";
             Dictionary<string, string> postdata = new Dictionary<string, string>();
-            postdata.Add("text", Text);
+            postdata.Add("text", txt);
             postdata.Add("visibility", Visibility == "" ? "public" : Visibility);
             postdata.Add("i", i);
             var postjson = JsonConvert.SerializeObject(postdata);
@@ -29,6 +50,7 @@ namespace NowPlaying
                 var content = new StringContent(postjson, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(instanceurl + "/api/notes/create", content);
             }
+            Postedtrack = track;
         }
         public async Task<bool> GetToken(string url)
         {
