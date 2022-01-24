@@ -82,7 +82,7 @@ namespace NowPlaying
             NLogService.PrintInfoLog("Loading SettingFile");
             if (!File.Exists("APISetting.json"))
             {
-                File.Copy("APISetting.json", "DefaultAPISetting.json");
+                File.Copy("DefaultAPISetting.json", "APISetting.json");
             }
             else
             {
