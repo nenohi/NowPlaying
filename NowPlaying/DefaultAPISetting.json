@@ -7,5 +7,6 @@
   "MisskeyVisibility": "public",
   "BackgroundColor": "White",
   "ForegroundColorText": "Black",
-  "AutoChangeColor": false
+  "AutoChangeColor": false,
+  "SettingPostDataText": "",
 }

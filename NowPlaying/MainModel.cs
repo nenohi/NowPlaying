@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -82,7 +82,7 @@ namespace NowPlaying
             NLogService.PrintInfoLog("Loading SettingFile");
             if (!File.Exists("APISetting.json"))
             {
-                File.Copy("APISetting.json", "DefaultAPISetting.json");
+                File.Copy("DefaultAPISetting.json", "APISetting.json");
             }
             else
             {
@@ -125,6 +125,14 @@ namespace NowPlaying
                     SettingwindowViewModel.SettingBackgroundColorText = items.BackgroundColorText;
                     SettingwindowViewModel.SettingForegroundColorText = items.ForegroundColorText;
                     SettingwindowViewModel.IsAutoChangeColor = items.AutoChangeColor;
+                    if(items.SettingPostDataText == string.Empty)
+                    {
+                        SettingwindowViewModel.SettingPostDataText = "Song:${Song}\nArtist:${Artist}\nAlbum:${Album}\n";
+                    }
+                    else
+                    {
+                        SettingwindowViewModel.SettingPostDataText = items.SettingPostDataText;
+                    }
                 }
             }
             File.Encrypt("APISetting.json");
@@ -141,6 +149,7 @@ namespace NowPlaying
             public string BackgroundColorText = "White";
             public string ForegroundColorText = "Black";
             public bool AutoChangeColor = false;
+            public string SettingPostDataText = "";
         }
         private async void MainwindowViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -184,17 +193,8 @@ namespace NowPlaying
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
                 if (playing == null || playing.Item == null) return;
-                SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
-                string artists = "";
-                foreach (var artist in track.Artists)
-                {
-                    artists += "?[" + artist.Name + "](" + artist.ExternalUrls.FirstOrDefault().Value + ")";
-                }
-                string txt = "Song:[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")\n" +
-                    "Artist:" + artists + "\n" +
-                    "Album:?[" + track.Album.Name + "](" + track.Album.ExternalUrls["spotify"] + ")\n" +
-                    "#NowPlaying";
-                await misskey.PostNote(txt, SettingwindowViewModel.MisskeyVisibility);
+
+                await misskey.PostNote(SettingwindowViewModel.SettingPostDataText, SettingwindowViewModel.MisskeyVisibility, playing);
             }
             else if (propertys[0] == "MisskeyAuth")
             {
@@ -277,17 +277,7 @@ namespace NowPlaying
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
                 if (playing == null || playing.Item == null) return;
-                SpotifyAPI.Web.FullTrack track = (SpotifyAPI.Web.FullTrack)playing.Item;
-                string artists = "";
-                foreach (var artist in track.Artists)
-                {
-                    artists += "?[" + artist.Name + "](" + artist.ExternalUrls.FirstOrDefault().Value + ")";
-                }
-                string Song = "[" + track.Name + "](" + track.ExternalUrls["spotify"] + ")";
-                string Album = "?[" + track.Album.Name + "](" + track.Album.ExternalUrls["spotify"] + ")";
-                string txt = SettingwindowViewModel.SettingPostDataText;
-                txt = txt.Replace("${Artist}", artists).Replace("${Song}",Song).Replace("${Album}",Album);
-                await misskey.PostNote(txt.Trim() + "\n#NowPlaying", "specified");
+                await misskey.PostNote(SettingwindowViewModel.SettingPostDataText, "specified", playing);
             }
         }
         public async Task RefreshPlayingView()
@@ -339,6 +329,7 @@ namespace NowPlaying
                             BackgroundColorText = SettingwindowViewModel.SettingBackgroundColorText,
                             ForegroundColorText = SettingwindowViewModel.SettingForegroundColorText,
                             AutoChangeColor = SettingwindowViewModel.IsAutoChangeColor,
+                            SettingPostDataText = SettingwindowViewModel.SettingPostDataText,
                         };
 
                         var data = JsonConvert.SerializeObject(items);

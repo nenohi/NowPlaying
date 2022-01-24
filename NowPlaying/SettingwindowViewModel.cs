@@ -134,6 +134,7 @@ namespace NowPlaying
             {
                 _IsAlwayTop = value;
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("SettingIsAlwayTop"));
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsAlwayTop"));
             }
         }
 
