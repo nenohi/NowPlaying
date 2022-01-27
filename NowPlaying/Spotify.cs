@@ -18,7 +18,8 @@ namespace NowPlaying
         private string? refreshtoken;
         private string? _clientID;
         public System.Timers.Timer refreshtimer = new System.Timers.Timer();
-        private int _shuffle_status=0;
+        private int _shuffle_status = 0;
+        private Device _Device = new Device();
         public int ShuffleStatus
         {
             get
@@ -28,7 +29,7 @@ namespace NowPlaying
         }
         public string ClientID
         {
-            get 
+            get
             {
                 if (_clientID == null) return string.Empty;
                 return _clientID;
@@ -37,9 +38,9 @@ namespace NowPlaying
         }
         public string RefreshToken
         {
-            get 
+            get
             {
-                if(refreshtoken == null) return string.Empty;
+                if (refreshtoken == null) return string.Empty;
                 return refreshtoken;
             }
         }
@@ -71,22 +72,21 @@ namespace NowPlaying
                 IsGetToken = true;
                 await _server3.Stop();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                NLogService.logger.Error(ex,"SpotifySetToken Error");
+                NLogService.logger.Error(ex, "SpotifySetToken Error");
                 await _server3.Stop();
                 return false;
             }
             return true;
         }
-        public async Task GetToken2()
+        public async Task GetToken()
         {
             _server2 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
             await _server2.Start();
             _server2.AuthorizationCodeReceived += _server2_AuthorizationCodeReceived;
 
             (string verifier, string challenge) = PKCEUtil.GenerateCodes("o5nUHWpSJ3gMP5V3wWMqWwAWo6ikAN5QKi2gkutL5vZyKKkezw6gFGH5KYfc9M5j33mFCCZytMcf4dVh");
-            // Returns the passed string and its challenge (Make sure it's random and long enough)
             var loginRequest = new LoginRequest(
               new Uri("http://localhost:5000/callback"),
               ClientID,
@@ -95,7 +95,7 @@ namespace NowPlaying
             {
                 CodeChallengeMethod = "S256",
                 CodeChallenge = challenge,
-                Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.UserModifyPlaybackState, Scopes.UserReadRecentlyPlayed, Scopes.UserReadCurrentlyPlaying }
+                Scope = new[] { Scopes.PlaylistReadPrivate, Scopes.PlaylistReadCollaborative, Scopes.UserModifyPlaybackState, Scopes.UserReadRecentlyPlayed, Scopes.UserReadCurrentlyPlaying, Scopes.UserReadPlaybackState }
             };
             var uri = loginRequest.ToUri();
             BrowserUtil.Open(uri);
@@ -106,24 +106,16 @@ namespace NowPlaying
             await _server2.Stop();
             await GetCallback(arg2.Code);
         }
-
-        // This method should be called from your web-server when the user visits "http://localhost:5000/callback"
         public async Task GetCallback(string code)
         {
             _server3 = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
             await _server3.Start();
-
             (string verifier, string challenge) = PKCEUtil.GenerateCodes("o5nUHWpSJ3gMP5V3wWMqWwAWo6ikAN5QKi2gkutL5vZyKKkezw6gFGH5KYfc9M5j33mFCCZytMcf4dVh");
-            // Note that we use the verifier calculated above!
-
             var initialResponse = await new OAuthClient().RequestToken(
               new PKCETokenRequest(ClientID, code, new Uri("http://localhost:5000/callback"), verifier)
             );
-
             spotifyClient = new SpotifyClient(initialResponse.AccessToken);
             Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
-
-            // Also important for later: response.RefreshToken
             IsGetToken = true;
             refreshtoken = initialResponse.RefreshToken;
             await _server3.Stop();
@@ -135,7 +127,6 @@ namespace NowPlaying
             var newResponse = await new OAuthClient().RequestToken(
               new PKCETokenRefreshRequest(ClientID, RefreshToken)
             );
-
             spotifyClient = new SpotifyClient(newResponse.AccessToken);
             refreshtoken = newResponse.RefreshToken;
             await _server3.Stop();
@@ -150,15 +141,15 @@ namespace NowPlaying
             }
             catch (APIUnauthorizedException e)
             {
-                NLogService.logger.Info(e,"SpotifyTokenRefresh by GetCurrentPlaying");
+                NLogService.logger.Info(e, "SpotifyTokenRefresh by GetCurrentPlaying");
                 await RefreshTokenFunc();
                 Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             }
-            catch(APIException e)
+            catch (APIException e)
             {
                 NLogService.logger.Error(e, "SpotifyAPIError by GetCurrentPlaying");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 NLogService.logger.Error(e, "Unknown Error by GetCurrentPlaying");
             }
@@ -172,7 +163,7 @@ namespace NowPlaying
             {
                 await spotifyClient.Player.SkipNext();
             }
-            catch(APIException e)
+            catch (APIException e)
             {
                 NLogService.logger.Error(e, "SpotifyAPIError by NextSongs");
             }
@@ -188,7 +179,7 @@ namespace NowPlaying
             {
                 await spotifyClient.Player.SkipPrevious();
             }
-            catch(APIException e)
+            catch (APIException e)
             {
                 NLogService.logger.Error(e, "SpotifyAPIError by PreviousSongs");
             }
@@ -200,24 +191,51 @@ namespace NowPlaying
         public async Task PlayResume()
         {
             if (spotifyClient == null || Playing == null) return;
-            //Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
-            if (Playing.IsPlaying)
+            try
             {
-                await spotifyClient.Player.PausePlayback(new PlayerPausePlaybackRequest());
-                Playing.IsPlaying = false;
+                Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             }
-            else
+            catch (APIUnauthorizedException e)
             {
-                await spotifyClient.Player.ResumePlayback(new PlayerResumePlaybackRequest());
-                Playing.IsPlaying = true;
+                NLogService.logger.Error(e, "SpotifyToken Error");
+                await RefreshTokenFunc();
+                Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+            }
+            try
+            {
+                if (Playing.IsPlaying)
+                {
+                    DeviceResponse devices = await spotifyClient.Player.GetAvailableDevices();
+                    IEnumerable<Device> _d = devices.Devices.Where(d => d.IsActive == true);
+                    _Device = (Device) (_d.FirstOrDefault() ?? new Device());
+                    await spotifyClient.Player.PausePlayback();
+                    Playing.IsPlaying = false;
+                }
+                else
+                {
+                    if (_Device.Id == null)
+                    {
+                        await spotifyClient.Player.ResumePlayback();
+                    }
+                    else
+                    {
+                        await spotifyClient.Player.ResumePlayback(new PlayerResumePlaybackRequest() { DeviceId = _Device.Id, });
+                    }
+                    Playing.IsPlaying = true;
+                }
+            }
+            catch (APIException e)
+            {
+                NLogService.logger.Error(e, "Pause Resume Error");
+                _Device = new Device();
             }
         }
         public async Task SetRepeat()
         {
-            if(spotifyClient == null || Playing == null) return;
-            SpotifyAPI.Web.FullTrack fullTrack = (FullTrack) Playing.Item;
+            if (spotifyClient == null || Playing == null) return;
+            FullTrack fullTrack = (FullTrack)Playing.Item;
             _shuffle_status -= 1;
-            if(_shuffle_status < 0)
+            if (_shuffle_status < 0)
             {
                 _shuffle_status = 2;
             }
