@@ -18,7 +18,14 @@ namespace NowPlaying
         private string? refreshtoken;
         private string? _clientID;
         public System.Timers.Timer refreshtimer = new System.Timers.Timer();
-
+        private int _shuffle_status=0;
+        public int ShuffleStatus
+        {
+            get
+            {
+                return _shuffle_status;
+            }
+        }
         public string ClientID
         {
             get 
@@ -204,6 +211,17 @@ namespace NowPlaying
                 await spotifyClient.Player.ResumePlayback();
                 Playing.IsPlaying = true;
             }
+        }
+        public async Task SetRepeat()
+        {
+            if(spotifyClient == null || Playing == null) return;
+            SpotifyAPI.Web.FullTrack fullTrack = (FullTrack) Playing.Item;
+            _shuffle_status -= 1;
+            if(_shuffle_status < 0)
+            {
+                _shuffle_status = 2;
+            }
+            await spotifyClient.Player.SetRepeat(new PlayerSetRepeatRequest((PlayerSetRepeatRequest.State)ShuffleStatus));
         }
         public void Dispose()
         {

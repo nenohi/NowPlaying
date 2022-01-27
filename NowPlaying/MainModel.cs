@@ -74,7 +74,14 @@ namespace NowPlaying
             {
                 SettingwindowViewModel.Spotifybuttondisable = false;
             }
-            await RefreshPlayingView();
+            try
+            {
+                await RefreshPlayingView();
+            }
+            catch (System.Net.Http.HttpRequestException err)
+            {
+                NLogService.logger.Error(err);
+            }
         }
 
         public async Task ReadSetting()
@@ -279,6 +286,12 @@ namespace NowPlaying
                 if (playing == null || playing.Item == null) return;
                 await misskey.PostNote(SettingwindowViewModel.SettingPostDataText, "specified", playing);
             }
+            else if(propertys[0] == "RepeatCommand")
+            {
+                if(!Spotify.IsGetToken) return;
+                await Spotify.SetRepeat();
+                MainwindowViewModel.Shuffle_Status = Spotify.ShuffleStatus;
+            }
         }
         public async Task RefreshPlayingView()
         {
@@ -358,7 +371,7 @@ namespace NowPlaying
     public static class NLogService
     {
 
-        private static Logger logger = LogManager.GetCurrentClassLogger();
+        public static Logger logger = LogManager.GetCurrentClassLogger();
 
         public static void PrintInfoLog(string str)
         {

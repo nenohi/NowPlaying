@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +23,9 @@ namespace NowPlaying
         private Brush _imageAverageForegroundColor = Brushes.Black;
         private Brush _imageAverageBackgroundColor = Brushes.White;
         private bool _autochangecolor = false;
+        private int _shuffle_Status = 0;
+
+        #region Function
         public async Task ViewImageURL(string url)
         {
             using (var web = new System.Net.Http.HttpClient())
@@ -89,6 +92,7 @@ namespace NowPlaying
                 }
             }
         }
+        #endregion
         public Brush ImageAverageBackgroundColor
         {
             get { return _imageAverageBackgroundColor; }
@@ -169,6 +173,24 @@ namespace NowPlaying
                 OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("IsPlayingSendButton"));
             }
         }
+        public int Shuffle_Status
+        {
+            get { return _shuffle_Status; }
+            set
+            {
+                _shuffle_Status = value;
+                OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("Shuffle_string"));
+            }
+        }
+        public string Shuffle_string
+        {
+            get
+            {
+                if (Shuffle_Status == 0) return "🔂";
+                if (Shuffle_Status == 1) return "🔁";
+                return "  ";
+            }
+        }
         public DelegateCommand OpenSettingWindow
         {
             get
@@ -197,6 +219,16 @@ namespace NowPlaying
                 return new DelegateCommand<string>((par) =>
                 {
                     OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("PlayerControlCommand-" + par));
+                });
+            }
+        }
+        public DelegateCommand RepeatCommand
+        {
+            get
+            {
+                return new DelegateCommand(() =>
+                {
+                    OnPropertyChanged(new System.ComponentModel.PropertyChangedEventArgs("RepeatCommand"));
                 });
             }
         }
