@@ -123,7 +123,7 @@ namespace NowPlaying
                 }
                 catch(Exception ex)
                 {
-                    NLogService.PrintErrorLog(ex, "Unknown Error By GetToken");
+                    NLogService.logger.Error(ex, "Unknown Error By GetToken");
                     return false;
                 }
                 return true;

@@ -18,7 +18,14 @@ namespace NowPlaying
         private string? refreshtoken;
         private string? _clientID;
         public System.Timers.Timer refreshtimer = new System.Timers.Timer();
-
+        private int _shuffle_status=0;
+        public int ShuffleStatus
+        {
+            get
+            {
+                return _shuffle_status;
+            }
+        }
         public string ClientID
         {
             get 
@@ -66,7 +73,7 @@ namespace NowPlaying
             }
             catch(Exception ex)
             {
-                NLogService.PrintErrorLog(ex,"SpotifySetToken Error");
+                NLogService.logger.Error(ex,"SpotifySetToken Error");
                 await _server3.Stop();
                 return false;
             }
@@ -143,17 +150,17 @@ namespace NowPlaying
             }
             catch (APIUnauthorizedException e)
             {
-                NLogService.PrintInfoLog(e,"SpotifyTokenRefresh by GetCurrentPlaying");
+                NLogService.logger.Info(e,"SpotifyTokenRefresh by GetCurrentPlaying");
                 await RefreshTokenFunc();
                 Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             }
             catch(APIException e)
             {
-                NLogService.PrintErrorLog(e, "SpotifyAPIError by GetCurrentPlaying");
+                NLogService.logger.Error(e, "SpotifyAPIError by GetCurrentPlaying");
             }
             catch(Exception e)
             {
-                NLogService.PrintErrorLog(e, "Unknown Error by GetCurrentPlaying");
+                NLogService.logger.Error(e, "Unknown Error by GetCurrentPlaying");
             }
             return Playing;
         }
@@ -167,11 +174,11 @@ namespace NowPlaying
             }
             catch(APIException e)
             {
-                NLogService.PrintErrorLog(e, "SpotifyAPIError by NextSongs");
+                NLogService.logger.Error(e, "SpotifyAPIError by NextSongs");
             }
             catch (Exception e)
             {
-                NLogService.PrintErrorLog(e, "Unknown Error by NextSongs");
+                NLogService.logger.Error(e, "Unknown Error by NextSongs");
             }
         }
         public async Task PreviousSongs()
@@ -183,11 +190,11 @@ namespace NowPlaying
             }
             catch(APIException e)
             {
-                NLogService.PrintErrorLog(e, "SpotifyAPIError by PreviousSongs");
+                NLogService.logger.Error(e, "SpotifyAPIError by PreviousSongs");
             }
             catch (Exception e)
             {
-                NLogService.PrintErrorLog(e, "Unknown Error by PreviousSongs");
+                NLogService.logger.Error(e, "Unknown Error by PreviousSongs");
             }
         }
         public async Task PlayResume()
@@ -196,14 +203,25 @@ namespace NowPlaying
             //Playing = await spotifyClient.Player.GetCurrentlyPlaying(new PlayerCurrentlyPlayingRequest(PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
             if (Playing.IsPlaying)
             {
-                await spotifyClient.Player.PausePlayback();
+                await spotifyClient.Player.PausePlayback(new PlayerPausePlaybackRequest());
                 Playing.IsPlaying = false;
             }
             else
             {
-                await spotifyClient.Player.ResumePlayback();
+                await spotifyClient.Player.ResumePlayback(new PlayerResumePlaybackRequest());
                 Playing.IsPlaying = true;
             }
+        }
+        public async Task SetRepeat()
+        {
+            if(spotifyClient == null || Playing == null) return;
+            SpotifyAPI.Web.FullTrack fullTrack = (FullTrack) Playing.Item;
+            _shuffle_status -= 1;
+            if(_shuffle_status < 0)
+            {
+                _shuffle_status = 2;
+            }
+            await spotifyClient.Player.SetRepeat(new PlayerSetRepeatRequest((PlayerSetRepeatRequest.State)ShuffleStatus));
         }
         public void Dispose()
         {
