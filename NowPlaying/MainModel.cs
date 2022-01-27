@@ -86,7 +86,7 @@ namespace NowPlaying
 
         public async Task ReadSetting()
         {
-            NLogService.PrintInfoLog("Loading SettingFile");
+            NLogService.logger.Info("Loading SettingFile");
             if (!File.Exists("APISetting.json"))
             {
                 File.Copy("DefaultAPISetting.json", "APISetting.json");
@@ -108,7 +108,7 @@ namespace NowPlaying
                         {
                             SettingwindowViewModel.Spotifybuttondisable = false;
                             SettingwindowViewModel.SpotifyConnectButton = "Connected";
-                            NLogService.PrintInfoLog("Spotify Token OK");
+                            NLogService.logger.Info("Spotify Token OK");
                         }
                     }
                     if (items.MisskeyToken != string.Empty && items.MisskeyInstanceURL != string.Empty)
@@ -119,7 +119,7 @@ namespace NowPlaying
                         {
                             SettingwindowViewModel.MisskeyButtonDisable = false;
                             SettingwindowViewModel.MisskeyConnectButton = "Connected";
-                            NLogService.PrintInfoLog("MisskeyInstance Connected");
+                            NLogService.logger.Info("MisskeyInstance Connected");
                         }
                         else
                         {
@@ -143,7 +143,7 @@ namespace NowPlaying
                 }
             }
             File.Encrypt("APISetting.json");
-            NLogService.PrintInfoLog("Loading SettingFile Done");
+            NLogService.logger.Info("Loading SettingFile Done");
         }
         public class Item
         {
@@ -195,7 +195,7 @@ namespace NowPlaying
                 }
                 catch (Exception ex)
                 {
-                    NLogService.PrintInfoLog("SpotifyTokenRefresh");
+                    NLogService.logger.Info("SpotifyTokenRefresh");
                     await Spotify.RefreshTokenFunc();
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
@@ -279,7 +279,7 @@ namespace NowPlaying
                 }
                 catch (Exception ex)
                 {
-                    NLogService.PrintInfoLog("SpotifyTokenRefresh");
+                    NLogService.logger.Info("SpotifyTokenRefresh");
                     await Spotify.RefreshTokenFunc();
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
@@ -328,7 +328,7 @@ namespace NowPlaying
                 return new DelegateCommand(() =>
                 {
                     File.Decrypt("APISetting.json");
-                    NLogService.PrintInfoLog("Saving SettingFile");
+                    NLogService.logger.Info("Saving SettingFile");
                     using (StreamWriter w = new StreamWriter("APISetting.json"))
                     {
                         Item items = new Item()
@@ -353,7 +353,7 @@ namespace NowPlaying
                         }
                         catch (Exception e)
                         {
-                            NLogService.PrintErrorLog(e, "APISettingFile Encrypte");
+                            NLogService.logger.Error(e, "APISettingFile Encrypte");
                         }
                     }
                     Spotify.Dispose();
@@ -361,7 +361,7 @@ namespace NowPlaying
                     {
                         SettingWindow.Close();
                     }
-                    NLogService.PrintInfoLog("Saving SettingFile Done");
+                    NLogService.logger.Info("Saving SettingFile Done");
                     NLogService.Dispose();
                 });
             }
@@ -372,27 +372,6 @@ namespace NowPlaying
     {
 
         public static Logger logger = LogManager.GetCurrentClassLogger();
-
-        public static void PrintInfoLog(string str)
-        {
-            logger.Info(str);
-        }
-        public static void PrintInfoLog(Exception ex, string str)
-        {
-            logger.Info(ex, str);
-        }
-        public static void PrintErrorLog(Exception ex, string str)
-        {
-            logger.Error(ex, str);
-        }
-        public static void PrintDebugLog(string str)
-        {
-            logger.Debug(str);
-        }
-        public static void PrintDebugLog(Exception ex, string str)
-        {
-            logger.Debug(ex, str);
-        }
         public static void Dispose()
         {
             NLog.LogManager.Shutdown();
