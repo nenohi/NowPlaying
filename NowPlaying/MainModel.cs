@@ -131,6 +131,7 @@ namespace NowPlaying
                         }
                     }
                     SettingwindowViewModel.IsAlwayTop = items.alwaytop;
+                    IsAlwayTop = items.alwaytop;
                     SettingwindowViewModel.MisskeyVisibility = items.MisskeyVisibility;
                     SettingwindowViewModel.SettingBackgroundColorText = items.BackgroundColorText;
                     SettingwindowViewModel.SettingForegroundColorText = items.ForegroundColorText;
