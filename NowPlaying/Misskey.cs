@@ -68,6 +68,8 @@ namespace NowPlaying
             {
                 appSecret = string.Empty;
                 token = string.Empty;
+                instanceurl = tmpurl;
+                i = string.Empty;
             }
             if (appSecret == string.Empty && token == string.Empty)
             {
@@ -119,7 +121,14 @@ namespace NowPlaying
                 try
                 {
                     authSessionUserkeyRes = JsonConvert.DeserializeObject<AuthSessionUserkeyRes>(authseuserres);
-                    i = authSessionUserkeyRes.accessToken;
+                    if(await CheckToken(authSessionUserkeyRes.accessToken))
+                    {
+                        i = authSessionUserkeyRes.accessToken;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -183,15 +192,24 @@ namespace NowPlaying
                 var postjson = JsonConvert.SerializeObject(data);
                 var content = new StringContent(postjson, Encoding.UTF8, "application/json");
                 var response = await client.PostAsync(instanceurl + "/api/i", content);
-                if(response.IsSuccessStatusCode)
+                var res = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
                 {
+                    Account = JsonConvert.DeserializeObject<UserData>(res);
                     i = itoken;
                     return true;
                 }
                 return false;
             }
         }
-
+        public UserData Account { get; set; } = new UserData();
+        public class UserData
+        {
+            public string id { get; set; }
+            public string name { get; set; }
+            public string username { get; set; }
+            public string host { get; set; }
+        }
         public class AppCreate
         {
             public string name { get; set; }
