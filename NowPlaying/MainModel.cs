@@ -12,6 +12,7 @@ using Prism.Commands;
 using Prism.Mvvm;
 using NLog;
 using System.Windows.Media;
+using System.Collections.ObjectModel;
 
 namespace NowPlaying
 {
@@ -135,13 +136,27 @@ namespace NowPlaying
                     SettingwindowViewModel.SettingBackgroundColorText = items.BackgroundColorText;
                     SettingwindowViewModel.SettingForegroundColorText = items.ForegroundColorText;
                     SettingwindowViewModel.IsAutoChangeColor = items.AutoChangeColor;
-                    if(items.SettingPostDataText == string.Empty)
+                    if (items.SettingPostDataText == string.Empty)
                     {
                         SettingwindowViewModel.SettingPostDataText = "Song:${Song}\nArtist:${Artist}\nAlbum:${Album}\n";
                     }
                     else
                     {
                         SettingwindowViewModel.SettingPostDataText = items.SettingPostDataText;
+                    }
+                    if(items.Accounts.Count > 0)
+                    {
+                        SettingwindowViewModel.AccountLists = items.Accounts;
+                        for(var i = 0; i < SettingwindowViewModel.AccountLists.Count; i++)
+                        {
+                            if(SettingwindowViewModel.AccountLists[i] != null)
+                            {
+                                if(SettingwindowViewModel.AccountLists[i].userurl == items.MisskeyInstanceURL && SettingwindowViewModel.AccountLists[i].usertoken == items.MisskeyToken)
+                                {
+                                    SettingwindowViewModel.SelectedAccountIndex = i;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -160,6 +175,7 @@ namespace NowPlaying
             public string ForegroundColorText = "Black";
             public bool AutoChangeColor = false;
             public string SettingPostDataText = "";
+            public ObservableCollection<SettingwindowViewModel.UserAccount> Accounts = new ObservableCollection<SettingwindowViewModel.UserAccount>();
         }
         private void MainwindowViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -222,6 +238,11 @@ namespace NowPlaying
             {
                 MainwindowViewModel.IsPlayingSendButton = false;
             }
+            else if (propertys[0] == "SelectedUser")
+            {
+                misskey.i = SettingwindowViewModel.SelectedUser.usertoken;
+                misskey.instanceurl = SettingwindowViewModel.SelectedUser.userurl;
+            }
         }
         private async void MainwindowViewModel_PropertyChangedasync(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -233,8 +254,11 @@ namespace NowPlaying
             }
             else if (propertys[0] == "PlayingSend")
             {
-                if (!Spotify.IsGetToken) return;
-                if (misskey.i == "") return;
+                if (!Spotify.IsGetToken || misskey.i == "")
+                {
+                    MainwindowViewModel.IsPlayingSendButton = true;
+                    return;
+                }
                 SpotifyAPI.Web.CurrentlyPlaying playing;
                 try
                 {
@@ -257,6 +281,34 @@ namespace NowPlaying
                 if (misskey.i != string.Empty)
                 {
                     SettingwindowViewModel.MisskeyConnectButton = "Connected";
+                    SettingwindowViewModel.MisskeyButtonDisable = false;
+                    if (misskey.Account != null)
+                    {
+                        SettingwindowViewModel.UserAccount userAcount = new SettingwindowViewModel.UserAccount()
+                        {
+                            userId = misskey.Account.id,
+                            username = misskey.Account.username,
+                            usertoken = misskey.i,
+                            userurl = misskey.instanceurl
+                        };
+                        bool flg = false;
+                        if (SettingwindowViewModel.AccountLists != null && SettingwindowViewModel.AccountLists.Count > 0)
+                        {
+                            SettingwindowViewModel.AccountLists.ToList().ForEach(list =>
+                            {
+                                if (list.userId == userAcount.userId && list.userurl == userAcount.userurl)
+                                {
+                                    flg = true;
+                                    return;
+                                }
+                            });
+                        }
+                        if (!flg && SettingwindowViewModel.AccountLists != null)
+                        {
+                            SettingwindowViewModel.AccountLists.Add(userAcount);
+                            SettingwindowViewModel.SelectedAccountIndex = SettingwindowViewModel.AccountLists.Count - 1;
+                        }
+                    }
                 }
             }
             else if (propertys[0] == "RefreshPlayingView")
@@ -280,7 +332,7 @@ namespace NowPlaying
                         break;
                 }
             }
-            else if(propertys[0] == "SettingCheckPostButton")
+            else if (propertys[0] == "SettingCheckPostButton")
             {
                 if (!Spotify.IsGetToken) return;
                 if (misskey.i == "") return;
@@ -299,9 +351,16 @@ namespace NowPlaying
                 if (playing == null || playing.Item == null) return;
                 await misskey.PostNote(SettingwindowViewModel.SettingPostDataText, "specified", playing);
             }
-            else if(propertys[0] == "RepeatCommand")
+            else if (propertys[0] == "SettingAccountChanged")
             {
-                if(!Spotify.IsGetToken) return;
+                if (SettingwindowViewModel.AccountLists.Count <= 0) return;
+                if (SettingwindowViewModel.AccountLists[SettingwindowViewModel.SelectedAccountIndex] == null) return;
+                misskey.i = SettingwindowViewModel.AccountLists[SettingwindowViewModel.SelectedAccountIndex].usertoken;
+                misskey.instanceurl = SettingwindowViewModel.AccountLists[SettingwindowViewModel.SelectedAccountIndex].userurl;
+            }
+            else if (propertys[0] == "RepeatCommand")
+            {
+                if (!Spotify.IsGetToken) return;
                 await Spotify.SetRepeat();
                 MainwindowViewModel.Shuffle_Status = Spotify.ShuffleStatus;
             }
@@ -356,6 +415,7 @@ namespace NowPlaying
                             ForegroundColorText = SettingwindowViewModel.SettingForegroundColorText,
                             AutoChangeColor = SettingwindowViewModel.IsAutoChangeColor,
                             SettingPostDataText = SettingwindowViewModel.SettingPostDataText,
+                            Accounts = SettingwindowViewModel.AccountLists,
                         };
 
                         var data = JsonConvert.SerializeObject(items);
