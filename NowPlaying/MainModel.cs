@@ -335,6 +335,7 @@ namespace NowPlaying
                     default:
                         break;
                 }
+                MainwindowViewModel.Shuffle_Status = Spotify.ShuffleStatus;
             }
             else if (propertys[0] == "SettingCheckPostButton")
             {
