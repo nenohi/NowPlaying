@@ -162,6 +162,7 @@ namespace NowPlaying
             try
             {
                 await spotifyClient.Player.SkipNext();
+                if (ShuffleStatus == 0) _shuffle_status = 1;
             }
             catch (APIException e)
             {
@@ -178,6 +179,7 @@ namespace NowPlaying
             try
             {
                 await spotifyClient.Player.SkipPrevious();
+                if (ShuffleStatus == 0) _shuffle_status = 1;
             }
             catch (APIException e)
             {

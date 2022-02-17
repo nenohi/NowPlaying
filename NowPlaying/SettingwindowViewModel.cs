@@ -327,7 +327,7 @@ namespace NowPlaying
             {
                 get
                 {
-                    return username + "@" + uri.Host;
+                    return "@"+username + "@" + uri.Host;
                 }
             }
             private Uri uri { get { return new Uri(userurl); } }

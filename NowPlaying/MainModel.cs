@@ -270,7 +270,11 @@ namespace NowPlaying
                     await Spotify.RefreshTokenFunc();
                     playing = await Spotify.GetCurrentlyPlaying();
                 }
-                if (playing == null || playing.Item == null) return;
+                if (playing == null || playing.Item == null)
+                {
+                    MainwindowViewModel.IsPlayingSendButton = true;
+                    return;
+                }
                 await misskey.PostNote(SettingwindowViewModel.SettingPostDataText, SettingwindowViewModel.MisskeyVisibility, playing);
                 MainwindowViewModel.IsPlayingSendButton = true;
             }
@@ -331,6 +335,7 @@ namespace NowPlaying
                     default:
                         break;
                 }
+                MainwindowViewModel.Shuffle_Status = Spotify.ShuffleStatus;
             }
             else if (propertys[0] == "SettingCheckPostButton")
             {
